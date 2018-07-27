@@ -27,39 +27,40 @@ class FragmentTabsGallery : Fragment() {
         recyclerView.setHasFixedSize(true)
         recyclerView.isNestedScrollingEnabled = false
 
-        val itemsImg = DataGenerator.getNatureImages(activity!!)
-        itemsImg.addAll(DataGenerator.getNatureImages(activity!!))
-        itemsImg.addAll(DataGenerator.getNatureImages(activity!!))
-        itemsImg.addAll(DataGenerator.getNatureImages(activity!!))
-        itemsImg.addAll(DataGenerator.getNatureImages(activity!!))
+        if (activity != null) {
+            val itemsImg = DataGenerator.getNatureImages(activity!!)
+            itemsImg.addAll(DataGenerator.getNatureImages(activity!!))
+            itemsImg.addAll(DataGenerator.getNatureImages(activity!!))
+            itemsImg.addAll(DataGenerator.getNatureImages(activity!!))
+            itemsImg.addAll(DataGenerator.getNatureImages(activity!!))
 
-        val items = ArrayList<SectionImage>()
-        for (i in itemsImg) {
-            items.add(SectionImage(i, "IMG_$i.jpg", false))
-        }
+            val items = ArrayList<SectionImage>()
+            for (i in itemsImg) {
+                items.add(SectionImage(i, "IMG_$i.jpg", false))
+            }
 
-//        Log.v(TAG, "items: " + items.size + ", items: " + items.toString())
+            var sectCount = 0
+            var sectIdx = 0
+            val months = DataGenerator.getStringsMonth(activity!!)
+            for (i in 0 until items.size / 10) {
+                Log.v(TAG, "forLoop: " + i + ", items.size" + items.size)
+                items.add(sectCount, SectionImage(-1, months[sectIdx], true))
+                sectCount = sectCount.plus(10)
+                sectIdx = sectIdx.inc()
+            }
 
-        var sect_count = 0
-        var sect_idx = 0
-        val months = DataGenerator.getStringsMonth(activity!!)
-        for (i in 0 until items.size / 10) {
-            Log.v(TAG, "forLoop: " + i + ", items.size" + items.size)
-            items.add(sect_count, SectionImage(-1, months.get(sect_idx), true))
-            sect_count = sect_count + 10
-            sect_idx++
-        }
-
-        //set data and list adapter
-        val gridSectionAdapter = AdapterGridSectioned(activity!!, items) {
-            item ->
-            Toast.makeText(activity!!, item.title, Toast.LENGTH_LONG).show()
+            //set data and list adapter
+            val gridSectionAdapter = AdapterGridSectioned(activity!!, items) {
+                item ->
+                Toast.makeText(activity!!, item.title, Toast.LENGTH_LONG).show()
 //            val productDetailIntent = Intent(this, ProductDetailActivity::class.java)
 //            productDetailIntent.putExtra(EXTRA_PRODUCT_DETAIL, item)
 //            startActivity(productDetailIntent)
+            }
+
+            recyclerView.adapter = gridSectionAdapter
         }
 
-        recyclerView.adapter = gridSectionAdapter
         return root
     }
 

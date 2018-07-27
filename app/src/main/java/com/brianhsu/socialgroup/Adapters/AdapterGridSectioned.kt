@@ -15,10 +15,12 @@ import com.brianhsu.socialgroup.Model.SectionImage
 import com.brianhsu.socialgroup.Utilities.TAG
 import com.brianhsu.socialgroup.Utilities.Tools
 
-class AdapterGridSectioned(val context: Context, val items: List<SectionImage>, val itemClick: (SectionImage) -> Unit) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
+private const val VIEW_ITEM = 1
+private const val VIEW_SECTION = 0
 
-    private val VIEW_ITEM = 1
-    private val VIEW_SECTION = 0
+class AdapterGridSectioned(private val context: Context, private val items: List<SectionImage>,
+                           private val itemClick: (SectionImage) -> Unit) :
+        RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
         if (holder is OriginalViewHolder) {
@@ -45,13 +47,13 @@ class AdapterGridSectioned(val context: Context, val items: List<SectionImage>, 
         return items.count()
     }
 
-    inner class OriginalViewHolder(itemView: View?, val itemClick: (SectionImage) -> Unit) : RecyclerView.ViewHolder(itemView) {
+    inner class OriginalViewHolder(itemView: View?, private val itemClick: (SectionImage) -> Unit) : RecyclerView.ViewHolder(itemView) {
         var image = itemView?.findViewById<ImageView>(R.id.image)
-        var lyt_parent = itemView?.findViewById<View>(R.id.lyt_parent)
+        var lytParent = itemView?.findViewById<View>(R.id.lyt_parent)
 
         fun bindSectionImage(sImage: SectionImage, context: Context) {
             Tools.displayImageOriginal(context, image, sImage.image)
-            lyt_parent?.setOnClickListener { itemClick(sImage) }
+            lytParent?.setOnClickListener { itemClick(sImage) }
 
             val layoutParams = itemView.layoutParams as StaggeredGridLayoutManager.LayoutParams
             layoutParams.isFullSpan = false
@@ -60,11 +62,11 @@ class AdapterGridSectioned(val context: Context, val items: List<SectionImage>, 
     }
 
     inner class SectionViewHolder(itemView: View?) : RecyclerView.ViewHolder(itemView) {
-        var title_section = itemView?.findViewById<TextView>(R.id.title_section)
+        var titleSection = itemView?.findViewById<TextView>(R.id.title_section)
 
         fun bindSectionImage(sImage: SectionImage, context: Context) {
             Log.v(TAG, "item.image: " + sImage.image)
-            title_section?.text = sImage.title
+            titleSection?.text = sImage.title
 
             val layoutParams = itemView.layoutParams as StaggeredGridLayoutManager.LayoutParams
             layoutParams.isFullSpan = true

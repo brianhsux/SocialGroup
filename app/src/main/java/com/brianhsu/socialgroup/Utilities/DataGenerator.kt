@@ -52,7 +52,7 @@ object DataGenerator {
         val items = ArrayList<String>()
         val arr = ctx.resources.getStringArray(R.array.month)
         for (s in arr) items.add(s)
-        Collections.shuffle(items)
+        items.shuffle()
         return items
     }
 

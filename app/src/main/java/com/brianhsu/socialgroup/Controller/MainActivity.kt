@@ -38,17 +38,17 @@ class MainActivity : AppCompatActivity() {
         mainToolbar.setNavigationIcon(R.drawable.ic_menu)
         setSupportActionBar(mainToolbar)
         actionBar = supportActionBar
-        actionBar!!.title = "Recents"
-        actionBar!!.setDisplayHomeAsUpEnabled(true)
+        actionBar?.title = "Recents"
+        actionBar?.setDisplayHomeAsUpEnabled(true)
         Tools.setSystemBarColor(this, R.color.grey_1000)
     }
 
     private fun initComponent() {
-        mainNavigation!!.setOnNavigationItemSelectedListener { item ->
+        mainNavigation?.setOnNavigationItemSelectedListener { item ->
             val transaction = supportFragmentManager.beginTransaction()
             when (item.itemId) {
                 R.id.navigation_recent -> {
-                    actionBar!!.title = item.title
+                    actionBar?.title = item.title
                     val titleRelease = item.title.toString() + " New Release"
                     newReleaseTitleTabStore.text = titleRelease
                     transaction.replace(R.id.fragment_container, fragment1)
@@ -57,7 +57,7 @@ class MainActivity : AppCompatActivity() {
                     return@setOnNavigationItemSelectedListener true
                 }
                 R.id.navigation_favorites -> {
-                    actionBar!!.title = item.title
+                    actionBar?.title = item.title
                     val titleRelease = item.title.toString() + " New Release"
                     newReleaseTitleTabStore.text = titleRelease
                     transaction.replace(R.id.fragment_container, fragment2)
@@ -66,7 +66,7 @@ class MainActivity : AppCompatActivity() {
                     return@setOnNavigationItemSelectedListener true
                 }
                 R.id.navigation_nearby -> {
-                    actionBar!!.title = item.title
+                    actionBar?.title = item.title
                     val titleRelease = item.title.toString() + " New Release"
                     newReleaseTitleTabStore.text = titleRelease
                     transaction.replace(R.id.fragment_container, fragment3)
@@ -107,17 +107,17 @@ class MainActivity : AppCompatActivity() {
     private fun animateNavigation(hide: Boolean) {
         if (isNavigationHide && hide || !isNavigationHide && !hide) return
         isNavigationHide = hide
-        val moveY = if (hide) 2 * mainNavigation!!.height else 0
-        mainNavigation!!.animate().translationY(moveY.toFloat()).setStartDelay(100).setDuration(300).start()
+        val moveY = if (hide) 2 * mainNavigation.height else 0
+        mainNavigation.animate().translationY(moveY.toFloat()).setStartDelay(100).setDuration(300).start()
     }
 
-    internal var isSearchBarHide = false
+    private var isSearchBarHide = false
 
     private fun animateSearchBar(hide: Boolean) {
         if (isSearchBarHide && hide || !isSearchBarHide && !hide) return
         isSearchBarHide = hide
-        val moveY = if (hide) -(2 * mainSearchBar!!.height) else 0
-        mainSearchBar!!.animate().translationY(moveY.toFloat()).setStartDelay(100).setDuration(300).start()
+        val moveY = if (hide) -(2 * mainSearchBar.height) else 0
+        mainSearchBar.animate().translationY(moveY.toFloat()).setStartDelay(100).setDuration(300).start()
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
