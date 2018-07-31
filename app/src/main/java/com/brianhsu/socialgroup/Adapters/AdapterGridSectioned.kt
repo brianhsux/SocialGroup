@@ -9,9 +9,8 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
-
-import com.brianhsu.socialgroup.R
 import com.brianhsu.socialgroup.Model.SectionImage
+import com.brianhsu.socialgroup.R
 import com.brianhsu.socialgroup.Utilities.TAG
 import com.brianhsu.socialgroup.Utilities.Tools
 

@@ -80,17 +80,17 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-        mainNestedScrollView.setOnScrollChangeListener(NestedScrollView.OnScrollChangeListener {
-            _, _, scrollY, _, oldScrollY ->
-            if (scrollY < oldScrollY) { // up
-                animateNavigation(false)
-                animateSearchBar(false)
-            }
-            if (scrollY > oldScrollY) { // down
-                animateNavigation(true)
-                animateSearchBar(true)
-            }
-        })
+//        mainNestedScrollView.setOnScrollChangeListener(NestedScrollView.OnScrollChangeListener {
+//            _, _, scrollY, _, oldScrollY ->
+//            if (scrollY < oldScrollY) { // up
+//                animateNavigation(false)
+//                animateSearchBar(false)
+//            }
+//            if (scrollY > oldScrollY) { // down
+//                animateNavigation(true)
+//                animateSearchBar(true)
+//            }
+//        })
     }
 
     private fun initFragment() {
