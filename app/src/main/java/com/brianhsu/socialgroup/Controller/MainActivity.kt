@@ -1,14 +1,21 @@
 package com.brianhsu.socialgroup.Controller
 
+import android.content.Intent
+import android.graphics.Color
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
-import android.support.v4.widget.NestedScrollView
+import android.support.design.widget.NavigationView
+import android.support.v4.view.GravityCompat
+import android.support.v4.widget.DrawerLayout
 import android.support.v7.app.ActionBar
+import android.support.v7.app.ActionBarDrawerToggle
 import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
+import android.view.View
 import android.widget.Toast
 import com.brianhsu.socialgroup.R
+import com.brianhsu.socialgroup.R.id.loginBtnNavHeader
 import com.brianhsu.socialgroup.Utilities.Tools
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.fragment_tabs_store_dark.*
@@ -30,17 +37,35 @@ class MainActivity : AppCompatActivity() {
         Log.v(debugTag, "onCreate")
 
         initToolbar()
+        initNavigationMenu()
         initComponent()
         initFragment()
     }
 
     private fun initToolbar() {
-        mainToolbar.setNavigationIcon(R.drawable.ic_menu)
         setSupportActionBar(mainToolbar)
         actionBar = supportActionBar
         actionBar?.title = "Recents"
         actionBar?.setDisplayHomeAsUpEnabled(true)
+        actionBar?.setHomeButtonEnabled(true)
         Tools.setSystemBarColor(this, R.color.grey_1000)
+    }
+
+    private fun initNavigationMenu() {
+        val navView = findViewById<NavigationView>(R.id.nav_view)
+        val drawer = findViewById<DrawerLayout>(R.id.drawer_layout)
+        val toggle = ActionBarDrawerToggle(this, drawer, mainToolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close)
+        drawer.setDrawerListener(toggle)
+        toggle.syncState()
+        navView.setNavigationItemSelectedListener { item ->
+            Toast.makeText(applicationContext, item.title.toString() + " Selected", Toast.LENGTH_SHORT).show()
+            actionBar?.setTitle(item.title)
+            drawer.closeDrawers()
+            true
+        }
+
+        // open drawer at start
+        drawer.openDrawer(GravityCompat.START)
     }
 
     private fun initComponent() {
@@ -134,4 +159,24 @@ class MainActivity : AppCompatActivity() {
         return super.onOptionsItemSelected(item)
     }
 
+
+    fun loginBtnNavClicked(view: View) {
+//        if (App.prefs.isLoggedIn) {
+//            UserDataServices.logout()
+//            channelAdapter.notifyDataSetChanged()
+//            messageAdapter.notifyDataSetChanged()
+//
+//            userNameNavHeader.text = ""
+//            userEmailNavHeader.text = ""
+//            userImageNavHeader.setImageResource(R.drawable.profiledefault)
+//            userImageNavHeader.setBackgroundColor(Color.TRANSPARENT)
+//            loginBtnNavHeader.text = "Login"
+//            mainChannelName.text = "Please log in!!"
+//
+//        } else {
+            val loginIntent = Intent(this, LoginActivity::class.java)
+            startActivity(loginIntent)
+//        }
+
+    }
 }
