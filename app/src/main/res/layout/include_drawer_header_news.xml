@@ -5,21 +5,28 @@
     android:id="@+id/linearLayout"
     android:layout_width="match_parent"
     android:layout_height="@dimen/nav_header_height"
-    android:background="@drawable/material_bg_1"
     android:gravity="bottom"
     android:theme="@style/ThemeOverlay.AppCompat.Dark">
 
+    <ImageView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:foreground="@color/overlay_dark_40"
+        android:scaleType="centerCrop"
+        android:src="@drawable/image_2" />
+
+
+    <!--<ImageView-->
     <com.mikhaellopez.circularimageview.CircularImageView
         android:id="@+id/userImageNavHeader"
         android:layout_width="70dp"
         android:layout_height="70dp"
         android:layout_marginBottom="8dp"
         android:layout_marginStart="16dp"
-        android:paddingTop="@dimen/nav_header_vertical_spacing"
         app:layout_constraintBottom_toTopOf="@+id/loginBtnNavHeader"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        android:src="@drawable/photo_female_2"
+        android:src="@drawable/profiledefault"
         app:civ_border_width="2dp" />
 
     <TextView
@@ -31,7 +38,7 @@
         android:textAppearance="@style/TextAppearance.AppCompat.Body1"
         app:layout_constraintStart_toEndOf="@+id/userImageNavHeader"
         app:layout_constraintTop_toTopOf="@+id/userImageNavHeader"
-        android:text="Joanna Wu" />
+        tools:text="BrianHsu" />
 
     <TextView
         android:id="@+id/userEmailNavHeader"
@@ -40,7 +47,7 @@
         android:layout_marginStart="8dp"
         app:layout_constraintStart_toEndOf="@+id/userImageNavHeader"
         app:layout_constraintTop_toBottomOf="@+id/userNameNavHeader"
-        android:text="joanna@gmail.com" />
+        tools:text="brianhsux@gmail.com" />
 
     <Button
         android:id="@+id/loginBtnNavHeader"

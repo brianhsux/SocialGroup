@@ -15,6 +15,7 @@ object UserDataServices {
     var avatarColor = ""
     var email = ""
     var name = ""
+    var gender = ""
 
     fun logout() {
         id = ""
@@ -22,6 +23,7 @@ object UserDataServices {
         avatarColor = ""
         email = ""
         name = ""
+        gender = ""
 
         App.prefs.authToken = ""
         App.prefs.userEmail = ""

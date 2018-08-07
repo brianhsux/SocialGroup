@@ -1,10 +1,14 @@
 package com.brianhsu.socialgroup.Controller
 
+import android.content.BroadcastReceiver
+import android.content.Context
 import android.content.Intent
+import android.content.IntentFilter
 import android.graphics.Color
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.support.design.widget.NavigationView
+import android.support.v4.content.LocalBroadcastManager
 import android.support.v4.view.GravityCompat
 import android.support.v4.widget.DrawerLayout
 import android.support.v7.app.ActionBar
@@ -15,10 +19,12 @@ import android.view.MenuItem
 import android.view.View
 import android.widget.Toast
 import com.brianhsu.socialgroup.R
-import com.brianhsu.socialgroup.R.id.loginBtnNavHeader
+import com.brianhsu.socialgroup.Sevices.UserDataServices
+import com.brianhsu.socialgroup.Utilities.BROADCAST_USER_DATA_CHANGE
 import com.brianhsu.socialgroup.Utilities.Tools
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.fragment_tabs_store_dark.*
+import kotlinx.android.synthetic.main.include_drawer_header_news.*
 
 class MainActivity : AppCompatActivity() {
 
@@ -31,6 +37,31 @@ class MainActivity : AppCompatActivity() {
 
     var debugTag: String = "MainActivity"
 
+    private val userDataChangeReceiver = object: BroadcastReceiver() {
+        override fun onReceive(context: Context, intent: Intent?) {
+            if (App.prefs.isLoggedIn) {
+                userNameNavHeader.text = UserDataServices.name
+                userEmailNavHeader.text = UserDataServices.email
+
+                val resourceId = resources.getIdentifier(UserDataServices.avatarName, "drawable", packageName)
+                userImageNavHeader.setImageResource(resourceId)
+//                userImageNavHeader.setBackgroundColor(UserDataServices.returnAvatarColor(UserDataServices.avatarColor))
+
+                loginBtnNavHeader.text = "Logout"
+
+//                MessageService.getChannels { complete ->
+//                    if (complete) {
+//                        if (MessageService.channels.count() > 0) {
+//                            selectedChannel = MessageService.channels[0]
+//                            channelAdapter.notifyDataSetChanged()
+//                            updateWithChannel()
+//                        }
+//                    }
+//                }
+            }
+        }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -40,6 +71,9 @@ class MainActivity : AppCompatActivity() {
         initNavigationMenu()
         initComponent()
         initFragment()
+
+        LocalBroadcastManager.getInstance(this).registerReceiver(userDataChangeReceiver,
+                IntentFilter(BROADCAST_USER_DATA_CHANGE))
     }
 
     private fun initToolbar() {
@@ -161,22 +195,21 @@ class MainActivity : AppCompatActivity() {
 
 
     fun loginBtnNavClicked(view: View) {
-//        if (App.prefs.isLoggedIn) {
-//            UserDataServices.logout()
+        if (App.prefs.isLoggedIn) {
+            UserDataServices.logout()
 //            channelAdapter.notifyDataSetChanged()
 //            messageAdapter.notifyDataSetChanged()
-//
-//            userNameNavHeader.text = ""
-//            userEmailNavHeader.text = ""
-//            userImageNavHeader.setImageResource(R.drawable.profiledefault)
-//            userImageNavHeader.setBackgroundColor(Color.TRANSPARENT)
-//            loginBtnNavHeader.text = "Login"
+
+            userNameNavHeader.text = ""
+            userEmailNavHeader.text = ""
+            userImageNavHeader.setImageResource(R.drawable.profiledefault)
+            userImageNavHeader.setBackgroundColor(Color.TRANSPARENT)
+            loginBtnNavHeader.text = "Login"
 //            mainChannelName.text = "Please log in!!"
-//
-//        } else {
+
+        } else {
             val loginIntent = Intent(this, LoginActivity::class.java)
             startActivity(loginIntent)
-//        }
-
+        }
     }
 }

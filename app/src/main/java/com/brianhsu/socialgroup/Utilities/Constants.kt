@@ -3,7 +3,7 @@ package com.brianhsu.socialgroup.Utilities
 // Debug Tag
 const val TAG = "SocialGroup>>>BBB"
 
-const val BASE_URL = "https://chattychatbh.herokuapp.com/v1/"
+const val BASE_URL = "https://webdevbootcamp-brianhsux.c9users.io/v1/"
 //const val BASE_URL = "https://10.0.2.2:3005/v1/"
 const val SOCKET_URL = "https://chattychatbh.herokuapp.com/"
 const val URL_REGISTER = "${BASE_URL}account/register"

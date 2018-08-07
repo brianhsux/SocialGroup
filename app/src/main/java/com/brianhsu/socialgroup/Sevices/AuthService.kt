@@ -79,13 +79,14 @@ object AuthService {
 
 
     fun createUser(name: String, email: String, avatarName: String,
-                   avatarColor: String, complete: (Boolean) -> Unit) {
+                   avatarColor: String, gender: String, complete: (Boolean) -> Unit) {
 
         val jsonBody = JSONObject()
         jsonBody.put("name", name)
         jsonBody.put("email", email)
         jsonBody.put("avatarName", avatarName)
         jsonBody.put("avatarColor", avatarColor)
+        jsonBody.put("gender", gender)
         val requestBody = jsonBody.toString()
 
         val createRequest = object : JsonObjectRequest(Method.POST, URL_CREATE_USER, null, Response.Listener { response ->
@@ -95,6 +96,7 @@ object AuthService {
                 UserDataServices.email = response.getString("email")
                 UserDataServices.avatarName = response.getString("avatarName")
                 UserDataServices.avatarColor = response.getString("avatarColor")
+                UserDataServices.gender = response.getString("gender")
                 UserDataServices.id = response.getString("_id")
                 complete(true)
             } catch (e: JSONException) {
@@ -131,6 +133,7 @@ object AuthService {
                 UserDataServices.email = response.getString("email")
                 UserDataServices.avatarName = response.getString("avatarName")
                 UserDataServices.avatarColor = response.getString("avatarColor")
+                UserDataServices.gender = response.getString("gender")
                 UserDataServices.id = response.getString("_id")
 
                 val userDataChange = Intent(BROADCAST_USER_DATA_CHANGE)

@@ -37,36 +37,19 @@ class CreateUserActivity : AppCompatActivity() {
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
     }
 
-
+    fun ClosedRange<Int>.random() =
+            Random().nextInt((endInclusive + 1) - start) +  start
 
     fun generateUserAvatar(view: View) {
-        val random = Random()
-        val randomLD = random.nextInt(2)
-        val randomNum = random.nextInt(28)
+        val randomNum = (1..8).random()
 
-        if (randomLD == 0) {
-            userAvatar = "light$randomNum"
-        } else {
-            userAvatar = "dark$randomNum"
+        userAvatar = when (radioGroupGender.checkedRadioButtonId) {
+            radio_male.id -> "photo_male_$randomNum"
+            else -> "photo_female_$randomNum"
         }
 
         val imageResId = resources.getIdentifier(userAvatar, "drawable", packageName)
         createAvatarImageView.setImageResource(imageResId)
-    }
-
-    fun generateColorClicked(view: View) {
-        val random = Random()
-        val r = random.nextInt(255)
-        val g = random.nextInt(255)
-        val b = random.nextInt(255)
-
-        createAvatarImageView.setBackgroundColor(Color.rgb(r, g, b))
-
-        val saveR = r.toDouble() / 255
-        val saveG = g.toDouble() / 255
-        val saveB = b.toDouble() / 255
-
-        avatarColor = "[$saveR, $saveG, $saveB, 1]"
     }
 
     fun createUserClicked(view: View) {
@@ -75,13 +58,17 @@ class CreateUserActivity : AppCompatActivity() {
         val userName = createUserNameText.text.toString()
         val email = createUserEmailText.text.toString()
         val password = createUserPasswordText.text.toString()
+        val gender = when (radioGroupGender.checkedRadioButtonId) {
+            radio_male.id -> "male"
+            else -> "female"
+        }
 
         if (userName.isNotEmpty() && email.isNotEmpty() && password.isNotEmpty()) {
             AuthService.registerUser(email, password) { registerSuccess ->
                 if (registerSuccess) {
                     AuthService.loginUser(email, password) { loginSuccess ->
                         if (loginSuccess) {
-                            AuthService.createUser(userName, email, userAvatar, avatarColor) { createSuccess ->
+                            AuthService.createUser(userName, email, userAvatar, avatarColor, gender) { createSuccess ->
                                 if (createSuccess) {
                                     val userDataChange = Intent(BROADCAST_USER_DATA_CHANGE)
                                     LocalBroadcastManager.getInstance(this).sendBroadcast(userDataChange)
@@ -123,6 +110,5 @@ class CreateUserActivity : AppCompatActivity() {
 
         createAvatarImageView.isEnabled = !enable
         createUserBtn.isEnabled = !enable
-//        generateColorBtn.isEnabled = !enable
     }
 }
