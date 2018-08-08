@@ -10,6 +10,8 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import com.brianhsu.socialgroup.Adapters.AdapterGridSectioned
+import com.brianhsu.socialgroup.Adapters.AdapterPostSectioned
+import com.brianhsu.socialgroup.Model.Post
 import com.brianhsu.socialgroup.Model.SectionImage
 import com.brianhsu.socialgroup.R
 import com.brianhsu.socialgroup.Utilities.DataGenerator
@@ -18,38 +20,35 @@ import java.util.ArrayList
 
 class SocialWallFragment : Fragment() {
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+        Log.d(TAG, "SocialWallFragment>>>onCreateView()");
         val root = inflater.inflate(R.layout.fragment_social_wall, container, false)
 
         val recyclerView = root.findViewById<RecyclerView>(R.id.social_wall_recycler_view)
-//        recyclerView.layoutManager = StaggeredGridLayoutManager(3, StaggeredGridLayoutManager.VERTICAL)
+        recyclerView.layoutManager = StaggeredGridLayoutManager(1, StaggeredGridLayoutManager.VERTICAL)
         recyclerView.setHasFixedSize(true)
         recyclerView.isNestedScrollingEnabled = false
 
         if (activity != null) {
-//            val itemsImg = DataGenerator.getNatureImages(activity!!)
-//            itemsImg.addAll(DataGenerator.getNatureImages(activity!!))
-//            itemsImg.addAll(DataGenerator.getNatureImages(activity!!))
-//            itemsImg.addAll(DataGenerator.getNatureImages(activity!!))
-//            itemsImg.addAll(DataGenerator.getNatureImages(activity!!))
-//
-//            val items = ArrayList<SectionImage>()
-//            for (i in itemsImg) {
-//                items.add(SectionImage(i, "IMG_$i.jpg", false))
-//            }
-//
-//            var sectCount = 0
-//            var sectIdx = 0
-//            val months = DataGenerator.getStringsMonth(activity!!)
-//            for (i in 0 until items.size / 10) {
-//                Log.v(TAG, "forLoop: " + i + ", items.size" + items.size)
-//                items.add(sectCount, SectionImage(-1, months[sectIdx], true))
-//                sectCount = sectCount.plus(10)
-//                sectIdx = sectIdx.inc()
-//            }
-//
-//            //set data and list adapter
-//
-//            recyclerView.adapter = gridSectionAdapter
+            Log.d(TAG, "SocialWallFragment>>>activity != null()")
+
+            val posts = ArrayList<Post>()
+            posts.add(Post("Brian", R.drawable.image_8, "234325", "Testing", R.drawable.image_7))
+            posts.add(Post("Joanna", R.drawable.image_1, "234325", "Testing", R.drawable.image_4))
+            posts.add(Post("Odin", R.drawable.image_2, "234325", "Testing", R.drawable.image_5))
+            posts.add(Post("Arthur", R.drawable.image_3, "234325", "Testing", R.drawable.image_6))
+
+            Log.d(TAG, "SocialWallFragment>>>posts[0].author: " + posts[0].authorName)
+
+            //set data and list adapter
+            val gridSectionAdapter = AdapterPostSectioned(activity!!, posts) {
+                post ->
+                Toast.makeText(activity!!, post.authorName, Toast.LENGTH_LONG).show()
+//            val productDetailIntent = Intent(this, ProductDetailActivity::class.java)
+//            productDetailIntent.putExtra(EXTRA_PRODUCT_DETAIL, item)
+//            startActivity(productDetailIntent)
+            }
+
+            recyclerView.adapter = gridSectionAdapter
         }
 
         return root
@@ -57,8 +56,8 @@ class SocialWallFragment : Fragment() {
 
     companion object {
 
-        fun newInstance(): FragmentTabsGallery {
-            return FragmentTabsGallery()
+        fun newInstance(): SocialWallFragment {
+            return SocialWallFragment()
         }
     }
 }

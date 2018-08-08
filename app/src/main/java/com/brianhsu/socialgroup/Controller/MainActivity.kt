@@ -31,7 +31,7 @@ class MainActivity : AppCompatActivity() {
     private var actionBar: ActionBar? = null
     private var isNavigationHide = false
 
-    private lateinit var fragment1 : FragmentTabsStore
+    private lateinit var fragment1 : SocialWallFragment
     private lateinit var fragment2 : FragmentTabsGallery
     private lateinit var fragment3 : FragmentTabsStore
 
@@ -45,7 +45,6 @@ class MainActivity : AppCompatActivity() {
 
                 val resourceId = resources.getIdentifier(UserDataServices.avatarName, "drawable", packageName)
                 userImageNavHeader.setImageResource(resourceId)
-//                userImageNavHeader.setBackgroundColor(UserDataServices.returnAvatarColor(UserDataServices.avatarColor))
 
                 loginBtnNavHeader.text = "Logout"
 
@@ -108,8 +107,8 @@ class MainActivity : AppCompatActivity() {
             when (item.itemId) {
                 R.id.navigation_recent -> {
                     actionBar?.title = item.title
-                    val titleRelease = item.title.toString() + " New Release"
-                    newReleaseTitleTabStore.text = titleRelease
+//                    val titleRelease = item.title.toString() + " New Release"
+//                    newReleaseTitleTabStore.text = titleRelease
                     transaction.replace(R.id.fragment_container, fragment1)
                     transaction.addToBackStack(null)
                     transaction.commit()
@@ -117,8 +116,8 @@ class MainActivity : AppCompatActivity() {
                 }
                 R.id.navigation_favorites -> {
                     actionBar?.title = item.title
-                    val titleRelease = item.title.toString() + " New Release"
-                    newReleaseTitleTabStore.text = titleRelease
+//                    val titleRelease = item.title.toString() + " New Release"
+//                    newReleaseTitleTabStore.text = titleRelease
                     transaction.replace(R.id.fragment_container, fragment2)
                     transaction.addToBackStack(null)
                     transaction.commit()
@@ -126,8 +125,8 @@ class MainActivity : AppCompatActivity() {
                 }
                 R.id.navigation_nearby -> {
                     actionBar?.title = item.title
-                    val titleRelease = item.title.toString() + " New Release"
-                    newReleaseTitleTabStore.text = titleRelease
+//                    val titleRelease = item.title.toString() + " New Release"
+//                    newReleaseTitleTabStore.text = titleRelease
                     transaction.replace(R.id.fragment_container, fragment3)
                     transaction.addToBackStack(null)
                     transaction.commit()
@@ -153,7 +152,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun initFragment() {
-        fragment1 = FragmentTabsStore.newInstance()
+        fragment1 = SocialWallFragment.newInstance()
         fragment2 = FragmentTabsGallery.newInstance()
         fragment3 = FragmentTabsStore.newInstance()
 

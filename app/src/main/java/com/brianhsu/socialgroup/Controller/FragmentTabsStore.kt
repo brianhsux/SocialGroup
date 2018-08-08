@@ -2,16 +2,19 @@ package com.brianhsu.socialgroup.Controller
 
 import android.os.Bundle
 import android.support.v4.app.Fragment
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import com.brianhsu.socialgroup.R
+import com.brianhsu.socialgroup.Utilities.TAG
 import com.brianhsu.socialgroup.Utilities.Tools
 
 class FragmentTabsStore : Fragment() {
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+        Log.d(TAG, "FragmentTabsStore>>>onCreateView()");
         val root = inflater.inflate(R.layout.fragment_tabs_store_dark, container, false)
 
         if (activity != null) {
@@ -28,7 +31,6 @@ class FragmentTabsStore : Fragment() {
     }
 
     companion object {
-
         fun newInstance(): FragmentTabsStore {
             return FragmentTabsStore()
         }

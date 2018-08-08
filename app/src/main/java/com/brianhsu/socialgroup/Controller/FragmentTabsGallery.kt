@@ -20,6 +20,7 @@ import java.util.ArrayList
 class FragmentTabsGallery : Fragment() {
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+        Log.d(TAG, "FragmentTabsStore>>>onCreateView()")
         val root = inflater.inflate(R.layout.fragment_tabs_gallery, container, false)
 
         val recyclerView = root.findViewById<RecyclerView>(R.id.recyclerView)

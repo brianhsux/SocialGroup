@@ -22,6 +22,7 @@ class AdapterGridSectioned(private val context: Context, private val items: List
         RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
+        Log.d(TAG, "AdapterGridSectioned>>>onBindViewHolder()")
         if (holder is OriginalViewHolder) {
             holder.bindSectionImage(items[position], context)
         } else if (holder is SectionViewHolder) {
@@ -30,6 +31,7 @@ class AdapterGridSectioned(private val context: Context, private val items: List
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
+        Log.d(TAG, "AdapterGridSectioned>>>onCreateViewHolder()")
         return when (viewType) {
             VIEW_ITEM -> {
                 val view = LayoutInflater.from(context).inflate(R.layout.item_grid_image_sectioned, parent, false)
