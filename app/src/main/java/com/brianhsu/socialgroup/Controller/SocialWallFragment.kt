@@ -31,11 +31,12 @@ class SocialWallFragment : Fragment() {
         if (activity != null) {
             Log.d(TAG, "SocialWallFragment>>>activity != null()")
 
+            val testString = "There are many variations of passages of Lorem Ipsum available, but the majority have suffered alteration in some form, by injected humour, or randomised words which don't look even slightly believable. If you are going to use a passage of Lorem Ipsum, you need to be sure there isn't anything embarrassing hidden in the middle of text. All the Lorem Ipsum generators on the Internet tend to repeat predefined chunks as necessary, making this the first true generator on the Internet. It uses a dictionary of over 200 Latin words, combined with a handful of model sentence structures, to generate Lorem Ipsum which looks reasonable. The generated Lorem Ipsum is therefore always free from repetition, injected humour, or non-characteristic words etc."
             val posts = ArrayList<Post>()
-            posts.add(Post("Brian", R.drawable.image_8, "234325", "Testing", R.drawable.image_7))
-            posts.add(Post("Joanna", R.drawable.image_1, "234325", "Testing", R.drawable.image_4))
-            posts.add(Post("Odin", R.drawable.image_2, "234325", "Testing", R.drawable.image_5))
-            posts.add(Post("Arthur", R.drawable.image_3, "234325", "Testing", R.drawable.image_6))
+            posts.add(Post("Brian", R.drawable.image_8, "234325", testString, R.drawable.image_7))
+            posts.add(Post("Joanna", R.drawable.image_1, "234325", testString, R.drawable.image_4))
+            posts.add(Post("Odin", R.drawable.image_2, "234325", testString, R.drawable.image_5))
+            posts.add(Post("Arthur", R.drawable.image_3, "234325", testString, R.drawable.image_6))
 
             Log.d(TAG, "SocialWallFragment>>>posts[0].author: " + posts[0].authorName)
 

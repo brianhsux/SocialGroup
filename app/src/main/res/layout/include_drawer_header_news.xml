@@ -15,8 +15,6 @@
         android:scaleType="centerCrop"
         android:src="@drawable/image_2" />
 
-
-    <!--<ImageView-->
     <com.mikhaellopez.circularimageview.CircularImageView
         android:id="@+id/userImageNavHeader"
         android:layout_width="70dp"

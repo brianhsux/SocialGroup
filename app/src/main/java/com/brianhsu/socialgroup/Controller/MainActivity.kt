@@ -211,4 +211,9 @@ class MainActivity : AppCompatActivity() {
             startActivity(loginIntent)
         }
     }
+
+    fun newPostFabBtnClicked(view: View) {
+        val createPostIntent = Intent(this, CreatePostActivity::class.java)
+        startActivity(createPostIntent)
+    }
 }
