@@ -15,3 +15,6 @@ const val URL_GET_MESSAGES = "${BASE_URL}message/byChannel/"
 
 // Broadcast Constants
 const val BROADCAST_USER_DATA_CHANGE = "BROADCAST_USER_DATA_CHANGE"
+
+// CreatePostActivity
+const val CHOOSE_IMAGE_REQUEST_CODE = 1000

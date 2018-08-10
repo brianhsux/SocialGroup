@@ -1,4 +1,4 @@
-package com.brianhsu.socialgroup.Controller
+package com.brianhsu.socialgroup.controller
 
 import android.os.Bundle
 import android.support.v4.app.Fragment
@@ -10,7 +10,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import com.brianhsu.socialgroup.Adapters.AdapterGridSectioned
-import com.brianhsu.socialgroup.Model.SectionImage
+import com.brianhsu.socialgroup.model.SectionImage
 import com.brianhsu.socialgroup.R
 import com.brianhsu.socialgroup.Utilities.DataGenerator
 import com.brianhsu.socialgroup.Utilities.TAG

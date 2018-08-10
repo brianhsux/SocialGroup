@@ -1,4 +1,4 @@
-package com.brianhsu.socialgroup.Controller
+package com.brianhsu.socialgroup.controller
 
 import android.content.Context
 import android.content.Intent
@@ -10,9 +10,7 @@ import android.view.inputmethod.InputMethodManager
 import android.widget.Toast
 import com.brianhsu.socialgroup.R
 import com.brianhsu.socialgroup.Sevices.AuthService
-import com.brianhsu.socialgroup.Utilities.Tools
 import kotlinx.android.synthetic.main.activity_login.*
-import kotlinx.android.synthetic.main.activity_main.*
 
 class LoginActivity : AppCompatActivity() {
 

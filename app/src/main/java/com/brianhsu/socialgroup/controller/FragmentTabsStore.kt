@@ -1,4 +1,4 @@
-package com.brianhsu.socialgroup.Controller
+package com.brianhsu.socialgroup.controller
 
 import android.os.Bundle
 import android.support.v4.app.Fragment

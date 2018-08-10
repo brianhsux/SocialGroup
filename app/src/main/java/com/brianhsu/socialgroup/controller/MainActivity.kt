@@ -1,4 +1,4 @@
-package com.brianhsu.socialgroup.Controller
+package com.brianhsu.socialgroup.controller
 
 import android.content.BroadcastReceiver
 import android.content.Context
@@ -13,7 +13,6 @@ import android.support.v4.view.GravityCompat
 import android.support.v4.widget.DrawerLayout
 import android.support.v7.app.ActionBar
 import android.support.v7.app.ActionBarDrawerToggle
-import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
@@ -23,7 +22,6 @@ import com.brianhsu.socialgroup.Sevices.UserDataServices
 import com.brianhsu.socialgroup.Utilities.BROADCAST_USER_DATA_CHANGE
 import com.brianhsu.socialgroup.Utilities.Tools
 import kotlinx.android.synthetic.main.activity_main.*
-import kotlinx.android.synthetic.main.fragment_tabs_store_dark.*
 import kotlinx.android.synthetic.main.include_drawer_header_news.*
 
 class MainActivity : AppCompatActivity() {
@@ -64,7 +62,6 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        Log.v(debugTag, "onCreate")
 
         initToolbar()
         initNavigationMenu()

@@ -7,7 +7,7 @@ import android.util.Log
 import com.android.volley.Response
 import com.android.volley.toolbox.JsonObjectRequest
 import com.android.volley.toolbox.StringRequest
-import com.brianhsu.socialgroup.Controller.App
+import com.brianhsu.socialgroup.controller.App
 import com.brianhsu.socialgroup.Utilities.*
 import org.json.JSONException
 import org.json.JSONObject

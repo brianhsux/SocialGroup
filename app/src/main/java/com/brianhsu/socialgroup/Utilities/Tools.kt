@@ -4,16 +4,22 @@ import android.app.Activity
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
+import android.content.Intent
 import android.content.res.Resources
+import android.database.Cursor
 import android.graphics.Bitmap
 import android.graphics.Color
+import android.graphics.Point
 import android.graphics.PorterDuff
+import android.net.Uri
 import android.os.Build
+import android.provider.DocumentsContract
 import android.support.annotation.ColorInt
 import android.support.annotation.ColorRes
 import android.support.annotation.DrawableRes
 import android.support.v4.content.ContextCompat
 import android.support.v4.graphics.drawable.RoundedBitmapDrawableFactory
+import android.support.v4.util.Pair
 import android.support.v4.widget.NestedScrollView
 import android.support.v7.widget.Toolbar
 import android.util.Log
@@ -27,6 +33,7 @@ import com.brianhsu.socialgroup.R
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.bumptech.glide.request.target.BitmapImageViewTarget
+import com.cloudinary.utils.StringUtils
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -249,4 +256,46 @@ object Tools {
         return builder.toString()
     }
 
+    fun openMediaChooser(activity: Activity?, requestCode: Int) {
+        val intent = Intent(Intent.ACTION_OPEN_DOCUMENT)
+        intent.addCategory(Intent.CATEGORY_OPENABLE)
+        intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true)
+        intent.putExtra(Intent.EXTRA_MIME_TYPES, arrayOf("image/jpeg", "image/jpg", "image/png", "video/*"))
+        intent.type = "(*/*"
+        activity?.startActivityForResult(intent, requestCode)
+    }
+
+    fun getScreenWidth(context: Context): Int {
+        val window = context.getSystemService(Context.WINDOW_SERVICE) as WindowManager
+        val point = Point()
+        window.defaultDisplay.getSize(point)
+        return point.x
+    }
+
+    fun getResourceNameAndType(context: Context, uri: Uri): Pair<String, String> {
+        var cursor: Cursor? = null
+        var type: String? = null
+        var name: String? = null
+
+        try {
+            cursor = context.contentResolver.query(uri, arrayOf(DocumentsContract.Document.COLUMN_MIME_TYPE, DocumentsContract.Document.COLUMN_DISPLAY_NAME), null, null, null)
+
+            if (cursor != null && cursor.moveToFirst()) {
+                name = cursor.getString(cursor.getColumnIndex(DocumentsContract.Document.COLUMN_DISPLAY_NAME))
+                type = cursor.getString(cursor.getColumnIndex(DocumentsContract.Document.COLUMN_MIME_TYPE))
+                if (StringUtils.isNotBlank(type)) {
+                    type = type!!.substring(0, type.indexOf('/'))
+                }
+            }
+        } finally {
+            if (cursor != null) {
+                cursor.close()
+            }
+        }
+
+        if (StringUtils.isBlank(type)) {
+            type = "image"
+        }
+        return Pair(name, type)
+    }
 }

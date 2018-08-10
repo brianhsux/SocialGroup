@@ -1,7 +1,7 @@
 package com.brianhsu.socialgroup.Sevices
 
 import android.graphics.Color
-import com.brianhsu.socialgroup.Controller.App
+import com.brianhsu.socialgroup.controller.App
 import java.util.*
 
 /**
