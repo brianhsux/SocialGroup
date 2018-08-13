@@ -15,7 +15,7 @@ class Resource : Serializable {
     var lastErrorCode: Int = 0
     var status: UploadStatus? = null
 
-    constructor() {}
+    constructor()
 
     constructor(localUri: String, name: String?, type: String?) {
         this.localUri = localUri

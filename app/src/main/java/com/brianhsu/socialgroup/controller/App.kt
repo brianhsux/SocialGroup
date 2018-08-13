@@ -18,7 +18,9 @@ class App: Application() {
 
     private var mainThreadHandler: Handler? = null
 
+
     companion object {
+        const val NOTIFICATION_CHANNEL_ID = "CLOUDINARY_CHANNEL"
         lateinit var prefs: SharePrefs
         lateinit var instance: App
     }

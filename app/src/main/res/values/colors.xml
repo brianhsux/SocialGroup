@@ -335,4 +335,12 @@
         <item type="color">#ff9800</item>
     </array>
 
+    <!-- Cloudinary color -->
+    <color name="addButtonColor">#ff5722</color>
+    <color name="windowBackground">#e4ebf1</color>
+    <color name="buttonColor">#0078ff</color>
+    <color name="buttonText">#fff</color>
+    <color name="black">#000</color>
+    <color name="white">#fff</color>
+    <color name="progress_overlay">#6000</color>
 </resources>

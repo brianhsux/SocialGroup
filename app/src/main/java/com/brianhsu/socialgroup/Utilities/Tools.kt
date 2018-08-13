@@ -7,10 +7,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.res.Resources
 import android.database.Cursor
-import android.graphics.Bitmap
-import android.graphics.Color
-import android.graphics.Point
-import android.graphics.PorterDuff
+import android.graphics.*
 import android.net.Uri
 import android.os.Build
 import android.provider.DocumentsContract
@@ -34,6 +31,7 @@ import com.bumptech.glide.Glide
 import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.bumptech.glide.request.target.BitmapImageViewTarget
 import com.cloudinary.utils.StringUtils
+import java.io.IOException
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -85,7 +83,7 @@ object Tools {
 
     fun displayImageOriginal(ctx: Context, img: ImageView?, @DrawableRes drawable: Int) {
         try {
-            Log.v(TAG, "displayImageOriginal: " + drawable.toString())
+//            Log.v(TAG, "displayImageOriginal: " + drawable.toString())
             Glide.with(ctx).load(drawable)
                     .crossFade()
                     .diskCacheStrategy(DiskCacheStrategy.NONE)
@@ -297,5 +295,67 @@ object Tools {
             type = "image"
         }
         return Pair(name, type)
+    }
+
+    @Throws(IOException::class)
+    fun decodeBitmapStream(context: Context, uri: Uri, reqWidth: Int, reqHeight: Int): Bitmap? {
+        var `is` = context.contentResolver.openInputStream(uri)
+
+        // First decode with inJustDecodeBounds=true to check dimensions
+        val options = BitmapFactory.Options()
+        options.inJustDecodeBounds = true
+        BitmapFactory.decodeStream(`is`, null, options)
+        `is`!!.close()
+        // Calculate inSampleSize
+        options.inSampleSize = calculateInSampleSize(options, reqWidth, reqHeight)
+
+        // Decode bitmap with inSampleSize set
+        options.inJustDecodeBounds = false
+        `is` = context.contentResolver.openInputStream(uri)
+        val bitmap = BitmapFactory.decodeStream(`is`, null, options)
+        `is`!!.close()
+        return if (bitmap == null) null else getCroppedBitmap(bitmap)
+    }
+
+    fun calculateInSampleSize(
+            options: BitmapFactory.Options, reqWidth: Int, reqHeight: Int): Int {
+        // Raw height and width of image
+        val height = options.outHeight
+        val width = options.outWidth
+        var inSampleSize = 1
+
+        if (height > reqHeight && width > reqWidth) {
+
+            val halfHeight = height / 2
+            val halfWidth = width / 2
+
+            // Calculate the largest inSampleSize value that is a power of 2 and keeps both
+            // height and width larger than the requested height and width.
+            while (halfHeight / inSampleSize >= reqHeight && halfWidth / inSampleSize >= reqWidth) {
+                inSampleSize *= 2
+            }
+        }
+
+        return inSampleSize
+    }
+
+    fun getCroppedBitmap(bitmap: Bitmap): Bitmap {
+        val dimension = if (bitmap.width < bitmap.height) bitmap.width else bitmap.height
+        val output = Bitmap.createBitmap(dimension, dimension, Bitmap.Config.ARGB_8888)
+        val canvas = Canvas(output)
+
+        val color = -0xbdbdbe
+        val paint = Paint()
+        val horizontalDiff = (bitmap.width - dimension) / 2
+        val verticalDiff = (bitmap.height - dimension) / 2
+        val rect = Rect(-horizontalDiff, -verticalDiff, bitmap.width - horizontalDiff, bitmap.height - verticalDiff)
+
+        paint.isAntiAlias = true
+        canvas.drawARGB(0, 0, 0, 0)
+        paint.color = color
+        canvas.drawCircle((dimension / 2).toFloat(), (dimension / 2).toFloat(), (dimension / 2).toFloat(), paint)
+        paint.xfermode = PorterDuffXfermode(PorterDuff.Mode.SRC_IN)
+        canvas.drawBitmap(bitmap, rect, rect, paint)
+        return output
     }
 }

@@ -1,7 +1,7 @@
 package com.brianhsu.socialgroup.Utilities
 
 // Debug Tag
-const val TAG = "SocialGroup>>>BBB"
+const val TAG = "BBB>>>SocialGroup"
 
 const val BASE_URL = "https://webdevbootcamp-brianhsux.c9users.io/v1/"
 //const val BASE_URL = "https://10.0.2.2:3005/v1/"

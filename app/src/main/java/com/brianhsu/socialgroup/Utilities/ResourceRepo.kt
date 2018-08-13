@@ -1,5 +1,7 @@
 package com.brianhsu.socialgroup.Utilities
 
+import android.util.Log
+import com.brianhsu.socialgroup.Sevices.CloudinaryService
 import com.brianhsu.socialgroup.controller.App
 import com.brianhsu.socialgroup.model.Resource
 import com.cloudinary.android.MediaManager
@@ -8,11 +10,11 @@ import com.cloudinary.android.sample.core.CloudinaryHelper
 import com.cloudinary.utils.StringUtils
 
 class ResourceRepo private constructor() {
-    private val helper: CloudinarySqliteHelper
-
-    init {
-        this.helper = CloudinarySqliteHelper(App.instance)
-    }
+//    private val helper: CloudinarySqliteHelper
+//
+//    init {
+//        this.helper = CloudinarySqliteHelper(App.instance)
+//    }
 
     fun resourceRescheduled(requestId: String, error: Int, errorDesc: String): Resource? {
         helper.setUploadResultParams(requestId, null, null, Resource.UploadStatus.RESCHEDULED, error, errorDesc)
@@ -20,11 +22,13 @@ class ResourceRepo private constructor() {
     }
 
     fun resourceFailed(requestId: String, error: Int, errorDesc: String): Resource? {
+        Log.d(TAG, "ResourceRepo>>>resourceFailed()-1")
         helper.setUploadResultParams(requestId, null, null, Resource.UploadStatus.FAILED, error, errorDesc)
         return helper.findByRequestId(requestId)
     }
 
-    fun resourceUploaded(requestId: String, publicId: String, deleteToken: String): Resource? {
+    fun resourceUploaded(requestId: String, publicId: String?, deleteToken: String?): Resource? {
+        Log.d(TAG, "ResourceRepo>>>resourceUploaded()-1")
         helper.setUploadResultParams(requestId, publicId, deleteToken, Resource.UploadStatus.UPLOADED, ErrorInfo.NO_ERROR, null)
         return helper.findByRequestId(requestId)
     }
@@ -37,6 +41,7 @@ class ResourceRepo private constructor() {
     }
 
     fun resourceUploading(requestId: String): Resource? {
+        Log.d(TAG, "ResourceRepo>>>resourceUploading()-1")
         helper.setUploadResultParams(requestId, null, null, Resource.UploadStatus.UPLOADING, ErrorInfo.NO_ERROR, null)
         return helper.findByRequestId(requestId)
     }
@@ -74,6 +79,18 @@ class ResourceRepo private constructor() {
         return helper.list(strStatuses)
     }
 
+    fun uploadTempResource(resource: Resource?): Resource? {
+//        if (StringUtils.isNotBlank(resource?.requestId)) {
+//            // cancel previous upload requests for this resource:
+//            MediaManager.get().cancelRequest(resource?.requestId)
+//        }
+
+        val requestId = "10071007"
+        resource?.requestId = requestId
+
+        return resourceQueued(resource)
+    }
+
     fun uploadResource(resource: Resource?): Resource? {
         if (StringUtils.isNotBlank(resource?.requestId)) {
             // cancel previous upload requests for this resource:
@@ -88,8 +105,10 @@ class ResourceRepo private constructor() {
 
     companion object {
         private val lockObject = Any()
-        private val RECENT_DELTA = (10 * 60 * 1000).toLong()
+        private const val RECENT_DELTA = (10 * 60 * 1000).toLong()
         private var _instance: ResourceRepo? = null
+        private val helper: CloudinarySqliteHelper = CloudinarySqliteHelper(App.instance)
+
 
         val instance: ResourceRepo?
             get() {
