@@ -23,6 +23,13 @@ class Resource : Serializable {
         this.resourceType = type
     }
 
+    fun info(): String {
+        return "localUri: $localUri, name: $name, type: $resourceType, " +
+                "cloudinaryPublicId: $cloudinaryPublicId, requestId: $requestId, " +
+                "deleteToken: $deleteToken, statusTimestamp: $statusTimestamp, " +
+                "lastErrorDesc: $lastErrorDesc, lastErrorCode: $lastErrorCode, status: $status"
+    }
+
     fun setLastError(errorCode: Int) {
         lastErrorCode = errorCode
     }

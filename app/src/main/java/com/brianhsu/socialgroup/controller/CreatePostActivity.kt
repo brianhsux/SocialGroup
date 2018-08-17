@@ -23,9 +23,11 @@ import android.view.ViewTreeObserver
 import com.brianhsu.socialgroup.Adapters.ResourcesAdapter
 import com.brianhsu.socialgroup.R
 import com.brianhsu.socialgroup.Sevices.CloudinaryService
+import com.brianhsu.socialgroup.Sevices.PostService
+import com.brianhsu.socialgroup.Sevices.UserDataServices
 import com.brianhsu.socialgroup.Utilities.*
 import com.brianhsu.socialgroup.model.Resource
-import kotlinx.android.synthetic.main.activity_create_user.*
+import kotlinx.android.synthetic.main.activity_create_post.*
 import java.util.*
 
 class CreatePostActivity : AppCompatActivity() {
@@ -38,11 +40,14 @@ class CreatePostActivity : AppCompatActivity() {
 //    private val statuses = Arrays.asList(Resource.UploadStatus.QUEUED, Resource.UploadStatus.UPLOADING, Resource.UploadStatus.UPLOADED)
     private var receiver: BroadcastReceiver? = null
 
+    private var selectData: Intent? = null
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_create_post)
 
         initToolbar()
+        initUserInfo()
         prepareRecyclerView()
         val handlerThread = HandlerThread("MainActivityWorker")
         handlerThread.start()
@@ -88,6 +93,7 @@ class CreatePostActivity : AppCompatActivity() {
             } else if (requestCode == CHOOSE_IMAGE_REQUEST_CODE && data != null) {
                 Log.d(TAG, "CreatePostActivity>>>onActivityResult()-2")
                 uploadImageFromIntentUri(data)
+                selectData = data
             }
         }
     }
@@ -107,8 +113,27 @@ class CreatePostActivity : AppCompatActivity() {
                 if (!isFinishing) {
                     Log.d(TAG, "CreatePostActivity>>>onReceive()-2")
                     if (CloudinaryService.ACTION_RESOURCE_MODIFIED == intent.action) {
-                        Log.d(TAG, "CreatePostActivity>>>onReceive()-3")
                         val resource = intent.getSerializableExtra("resource") as Resource
+
+
+                        Log.d(TAG, "CreatePostActivity>>>onReceive()-3, info: " + resource.info())
+                        if (!resource.cloudinaryPublicId.isNullOrEmpty()) {
+                            PostService.createPost(UserDataServices.email, UserDataServices.name,
+                                    UserDataServices.avatarName, resource.cloudinaryPublicId!!,
+                                    contentCreatePost.text.toString(), "TODO_POSTTIME") { createSuccess ->
+                                if (createSuccess) {
+                                    Log.d(TAG, "CreatePostActivity>>>onReceive()-3-1, createSuccess")
+//                                    val userDataChange = Intent(BROADCAST_USER_DATA_CHANGE)
+//                                    LocalBroadcastManager.getInstance(this).sendBroadcast(userDataChange)
+//                                    enableSpinner(false)
+                                    finish()
+                                } else {
+                                    Log.d(TAG, "CreatePostActivity>>>onReceive()-3-2, createFailed")
+//                                    errorToast()
+                                }
+                            }
+                        }
+
                         resourceUpdated(resource)
                     } else if (CloudinaryService.ACTION_UPLOAD_PROGRESS == intent.action) {
                         Log.d(TAG, "CreatePostActivity>>>onReceive()-4")
@@ -133,6 +158,15 @@ class CreatePostActivity : AppCompatActivity() {
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
     }
 
+    private fun initUserInfo() {
+        if (App.prefs.isLoggedIn) {
+            userNameCreatePost.text = UserDataServices.name
+
+            val resourceId = resources.getIdentifier(UserDataServices.avatarName, "drawable", packageName)
+            userImageCreatePost.setImageResource(resourceId)
+        }
+    }
+
     private fun prepareRecyclerView() {
         Log.d(TAG, "CreatePostActivity>>>prepareRecyclerView()")
         recyclerView = findViewById(R.id.galleryCreatePost)
@@ -155,8 +189,56 @@ class CreatePostActivity : AppCompatActivity() {
     override fun onOptionsItemSelected(item: MenuItem?): Boolean {
         when (item?.itemId) {
             android.R.id.home -> finish()
+            R.id.action_send_post -> doSendPostAction()
         }
         return super.onOptionsItemSelected(item)
+    }
+
+    fun uploadDataToCloudinary() {
+        if (selectData != null) {
+            val takeFlags = selectData!!.flags and (Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION)
+            Log.d(TAG, "CreatePostActivity>>>uploadDataToCloudinary()-1")
+            val uri = selectData!!.data
+            if (uri != null) {
+                Log.d(TAG, "CreatePostActivity>>>uploadDataToCloudinary()-2, uri: " + uri)
+                handleUriNew(uri, takeFlags)
+            } else if (selectData!!.clipData != null) {
+                Log.d(TAG, "CreatePostActivity>>>uploadDataToCloudinary()-3")
+                val clip = selectData!!.clipData
+                for (i in 0 until clip!!.itemCount) {
+                    handleUriNew(clip.getItemAt(i).uri, takeFlags)
+                }
+            }
+        }
+    }
+
+    private fun handleUriNew(uri: Uri, flags: Int) {
+        Log.d(TAG, "CreatePostActivity>>>handleUriNew()-1")
+        backgroundHandler?.post({
+            Log.d(TAG, "CreatePostActivity>>>handleUriNew()-2>>>run()")
+            if (DocumentsContract.isDocumentUri(applicationContext, uri)) {
+                contentResolver.takePersistableUriPermission(uri, flags)
+            }
+
+            val pair = Tools.getResourceNameAndType(applicationContext, uri)
+            val resource = Resource(uri.toString(), pair.first, pair.second)
+            uploadImageNew(resource)
+        })
+    }
+
+    private fun uploadImageNew(resource: Resource?) {
+        Log.d(TAG, "CreatePostActivity>>>uploadImageNew(), resource name: " + resource?.name +
+        ", resource url: " + resource?.localUri)
+        ResourceRepo.instance?.uploadResource(resource)
+    }
+
+    private fun doSendPostAction() {
+        Log.d(TAG, "CreatePostActivity>>>doSendPostAction()")
+        // 1. Upload the image to the cloudinary
+        uploadDataToCloudinary()
+        // 2. Get the url of the image in cloudinary
+        // 3. Send the post request with the social group api to server
+        // 4. If success, goto SocialWallFragment and refresh the adapter in it.
     }
 
     fun uploadGalleryFabBtnClicked(view: View) {
@@ -201,7 +283,7 @@ class CreatePostActivity : AppCompatActivity() {
         Log.d(TAG, "CreatePostActivity>>>uploadImageFromIntentUri()-1")
         val uri = data.data
         if (uri != null) {
-            Log.d(TAG, "CreatePostActivity>>>uploadImageFromIntentUri()-2")
+            Log.d(TAG, "CreatePostActivity>>>uploadImageFromIntentUri()-2, uri: " + uri)
             handleUri(uri, takeFlags)
         } else if (data.clipData != null) {
             Log.d(TAG, "CreatePostActivity>>>uploadImageFromIntentUri()-3")
@@ -255,6 +337,8 @@ class CreatePostActivity : AppCompatActivity() {
             }
 
             override fun onCancelClicked(resource: Resource) {
+                Log.d(TAG, "CreatePostActivity>>>getAdapter()>>>onCancelClicked(), thumbSize: " + thumbSize +
+                ", statuses: " + statuses)
                 (this as ResourcesAdapter.ImageClickedListener).onCancelClicked(resource)
             }
         })

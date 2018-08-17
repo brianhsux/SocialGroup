@@ -8,19 +8,23 @@ import android.graphics.Color
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.support.design.widget.NavigationView
+import android.support.design.widget.Snackbar
 import android.support.v4.content.LocalBroadcastManager
 import android.support.v4.view.GravityCompat
 import android.support.v4.widget.DrawerLayout
 import android.support.v7.app.ActionBar
 import android.support.v7.app.ActionBarDrawerToggle
+import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import android.widget.Toast
 import com.brianhsu.socialgroup.R
+import com.brianhsu.socialgroup.Sevices.PostService
 import com.brianhsu.socialgroup.Sevices.UserDataServices
 import com.brianhsu.socialgroup.Utilities.BROADCAST_USER_DATA_CHANGE
 import com.brianhsu.socialgroup.Utilities.Tools
+import com.brianhsu.socialgroup.Utilities.TAG
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.include_drawer_header_news.*
 
@@ -34,6 +38,8 @@ class MainActivity : AppCompatActivity() {
     private lateinit var fragment3 : FragmentTabsStore
 
     var debugTag: String = "MainActivity"
+
+    private var parent_view: View? = null
 
     private val userDataChangeReceiver = object: BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent?) {
@@ -68,6 +74,7 @@ class MainActivity : AppCompatActivity() {
         initComponent()
         initFragment()
 
+        parent_view = findViewById<View>(android.R.id.content)
         LocalBroadcastManager.getInstance(this).registerReceiver(userDataChangeReceiver,
                 IntentFilter(BROADCAST_USER_DATA_CHANGE))
     }
@@ -159,6 +166,19 @@ class MainActivity : AppCompatActivity() {
                 .commit()
     }
 
+    override fun onResume() {
+        super.onResume()
+        Log.d(TAG, "MainActivity>>>onResume()")
+        PostService.readAllPosts(this) { readSuccess ->
+            if (readSuccess) {
+                Log.d(TAG, "MainActivity>>>onResume()-1")
+                fragment1.refresh()
+            } else {
+                Log.d(TAG, "MainActivity>>>onResume()-2")
+            }
+        }
+    }
+
     private fun animateNavigation(hide: Boolean) {
         if (isNavigationHide && hide || !isNavigationHide && !hide) return
         isNavigationHide = hide
@@ -211,6 +231,14 @@ class MainActivity : AppCompatActivity() {
 
     fun newPostFabBtnClicked(view: View) {
         val createPostIntent = Intent(this, CreatePostActivity::class.java)
-        startActivity(createPostIntent)
+
+        if (App.prefs.isLoggedIn) {
+            startActivity(createPostIntent)
+        } else {
+            if (parent_view != null) {
+                Snackbar.make(parent_view!!, "Please Login", Snackbar.LENGTH_SHORT).show()
+            }
+        }
+
     }
 }

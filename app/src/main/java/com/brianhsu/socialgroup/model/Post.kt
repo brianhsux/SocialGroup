@@ -1,5 +1,5 @@
 package com.brianhsu.socialgroup.model
 
-class Post(val authorName: String, val authorImage: Int, val postTimeStamp: String,
-           val postContent: String, val postImage: Int) {
+class Post(authorEmail: String, val authorName: String, val authorImageId: String,
+           val postImageId: String, val postContent: String, val postTime: String) {
 }

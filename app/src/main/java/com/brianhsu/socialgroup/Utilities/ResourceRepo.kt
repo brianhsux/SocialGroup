@@ -79,18 +79,6 @@ class ResourceRepo private constructor() {
         return helper.list(strStatuses)
     }
 
-    fun uploadTempResource(resource: Resource?): Resource? {
-//        if (StringUtils.isNotBlank(resource?.requestId)) {
-//            // cancel previous upload requests for this resource:
-//            MediaManager.get().cancelRequest(resource?.requestId)
-//        }
-
-        val requestId = "10071007"
-        resource?.requestId = requestId
-
-        return resourceQueued(resource)
-    }
-
     fun uploadResource(resource: Resource?): Resource? {
         if (StringUtils.isNotBlank(resource?.requestId)) {
             // cancel previous upload requests for this resource:

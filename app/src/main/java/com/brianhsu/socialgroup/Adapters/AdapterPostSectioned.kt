@@ -12,7 +12,10 @@ import com.brianhsu.socialgroup.model.Post
 import com.brianhsu.socialgroup.R
 import com.brianhsu.socialgroup.Utilities.TAG
 import com.brianhsu.socialgroup.Utilities.Tools
+import com.cloudinary.Transformation
+import com.cloudinary.Url
 import com.mikhaellopez.circularimageview.CircularImageView
+import com.cloudinary.android.MediaManager
 
 class AdapterPostSectioned(private val context: Context, private val posts: List<Post>,
                            private val itemClick: (Post) -> Unit) :
@@ -43,10 +46,21 @@ class AdapterPostSectioned(private val context: Context, private val posts: List
 
 
         fun bindPost(context: Context, posts: Post) {
-            Tools.displayImageOriginal(context, userCircularImage, posts.authorImage)
-            Tools.displayImageOriginal(context, postImage, posts.postImage)
+//            Tools.displayImageOriginal(context, userCircularImage, posts.authorImage)
+//            Tools.displayImageOriginal(context, postImage, posts.postImage)
+            val authorImageId:String = posts.authorImageId
+            val authorImageUrl:String = MediaManager.get().url().generate("userImage/$authorImageId.jpg")
+            Tools.displayImageOriginal(context, userCircularImage, authorImageUrl)
+
+            val postImageId:String = posts.postImageId
+//            val postImageUrl:String = MediaManager.get().url().generate("$postImageId.webp")
+            val transformation: Transformation<*> = MediaManager.get().url().transformation().width(250).height(250).gravity("faces").crop("fill")
+            val postImageUrl:String = MediaManager.get().url().transformation(transformation).generate("$postImageId.webp")
+
+            Tools.displayImageOriginal(context, postImage, postImageUrl)
+
             userName?.text = posts.authorName
-            timeStamp?.text = posts.postTimeStamp
+            timeStamp?.text = posts.postTime
             postContent?.text = posts.postContent
 
 //            Log.d(TAG, "AdapterPostSectioned>>>bindPost()")
