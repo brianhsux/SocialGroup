@@ -32,16 +32,17 @@ class SocialWallFragment : Fragment() {
         recyclerView?.isNestedScrollingEnabled = false
 
         if (activity != null) {
-//            Log.d(TAG, "SocialWallFragment>>>activity != null()")
-
             val testString = "There are many variations of passages of Lorem Ipsum available, but the majority have suffered alteration in some form, by injected humour, or randomised words which don't look even slightly believable. If you are going to use a passage of Lorem Ipsum, you need to be sure there isn't anything embarrassing hidden in the middle of text. All the Lorem Ipsum generators on the Internet tend to repeat predefined chunks as necessary, making this the first true generator on the Internet. It uses a dictionary of over 200 Latin words, combined with a handful of model sentence structures, to generate Lorem Ipsum which looks reasonable. The generated Lorem Ipsum is therefore always free from repetition, injected humour, or non-characteristic words etc."
             val posts = PostService.posts
-//            posts.add(Post("", "Brian",  R.drawable.image_8, R.drawable.image_7, testString, "234325"))
-//            posts.add(Post("", "Joanna",  R.drawable.image_1, R.drawable.image_4, testString, "234325"))
-//            posts.add(Post("", "Odin",  R.drawable.image_2, R.drawable.image_5, testString,"234325" ))
-//            posts.add(Post("", "Arthur",  R.drawable.image_3, R.drawable.image_6, testString,"234325"))
 
-//            Log.d(TAG, "SocialWallFragment>>>posts[0].author: " + posts[0].authorName)
+            if (posts.size == 0) {
+                posts.add(Post("", "Brian",  "photo_male_1", "bcnkrwniruyzworepuuf", testString, "Aug 20, 2018 18:20:20"))
+                posts.add(Post("", "Joanna",  "photo_female_3", "edpftd8fyhgd4pmq1xof", testString, "Sep 20, 2018 18:20:20"))
+                posts.add(Post("", "Odin",  "photo_male_3", "qenujzureigckg1hcgtm", testString,"Dec 20, 2018 18:20:20" ))
+                posts.add(Post("", "Bradley",  "photo_male_4", "hcu80lmm3ssjtoos6e0i", testString,"July 20, 2018 18:20:20"))
+            }
+
+            posts.reverse()
 
             //set data and list adapter
             val gridSectionAdapter = AdapterPostSectioned(activity!!, posts) {

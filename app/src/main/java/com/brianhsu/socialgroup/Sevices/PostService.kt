@@ -91,15 +91,7 @@ object PostService {
         }, Response.ErrorListener {error ->
             Log.d(TAG, "Could not read post $error")
             complete(false)
-        }) {
-//            override fun getBodyContentType(): String {
-//                return ""
-//            }
-//
-//            override fun getBody(): ByteArray {
-//                return "".toByteArray()
-//            }
-        }
+        }) {}
 
         App.prefs.requestQueue.add(readRequest)
     }

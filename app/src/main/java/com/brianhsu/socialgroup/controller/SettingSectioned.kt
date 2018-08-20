@@ -21,8 +21,8 @@ class SettingSectioned : AppCompatActivity() {
 
     private fun initToolbar() {
         setSupportActionBar(toolbar)
-        supportActionBar!!.title = "Device Setting"
-        supportActionBar!!.setDisplayHomeAsUpEnabled(true)
+        supportActionBar?.title = "Device Setting"
+        supportActionBar?.setDisplayHomeAsUpEnabled(true)
     }
 
     private fun initComponent() {
