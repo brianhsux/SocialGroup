@@ -30,7 +30,7 @@ object PostService {
         jsonBody.put("postTime", postTime)
         val requestBody = jsonBody.toString()
 
-        val createRequest = object : JsonObjectRequest(Method.POST, URL_CREATE_POST, null, Response.Listener { response ->
+        val createRequest = object : JsonObjectRequest(Method.POST, App.prefs.URL_CREATE_POST, null, Response.Listener { response ->
 
             try {
                 complete(true)
@@ -62,7 +62,7 @@ object PostService {
 
     fun readAllPosts(context: Context, complete: (Boolean) -> Unit) {
 
-        val readRequest = object: JsonArrayRequest(Method.GET, URL_READ_POST, null, Response.Listener { response ->
+        val readRequest = object: JsonArrayRequest(Method.GET, App.prefs.URL_READ_POST, null, Response.Listener { response ->
             clearPosts()
 
             try {

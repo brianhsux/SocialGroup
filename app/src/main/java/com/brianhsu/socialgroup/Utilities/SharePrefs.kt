@@ -15,6 +15,11 @@ class SharePrefs(context: Context) {
     val USER_EMAIL = "userEmail"
     val AUTH_TOKEN = "authToken"
     val IS_LOGGED_IN = "isLoggedIn"
+    val BASE_URL = "baseUrl"
+    val IS_DEBUG_MODE = "isDebugMode"
+
+    val BASE_C9_URL = "https://webdevbootcamp-brianhsux.c9users.io/v1/"
+    val BASE_HEROKU_URL = "https://socialgroupapi.herokuapp.com/v1/"
 
     var isLoggedIn: Boolean
         get() = prefs.getBoolean(IS_LOGGED_IN, false)
@@ -28,5 +33,20 @@ class SharePrefs(context: Context) {
         get() = prefs.getString(USER_EMAIL, "")
         set(value) = prefs.edit().putString(USER_EMAIL, value).apply()
 
+    var baseUrl: String
+        get() = prefs.getString(BASE_URL, BASE_HEROKU_URL)
+        set(value) = prefs.edit().putString(BASE_URL, value).apply()
+
+    var isDebugMode: Boolean
+        get() = prefs.getBoolean(IS_DEBUG_MODE, false)
+        set(value) = prefs.edit().putBoolean(IS_DEBUG_MODE, value).apply()
+
     val requestQueue = Volley.newRequestQueue(context)
+
+    val URL_REGISTER = "${baseUrl}account/register"
+    val URL_LOGIN = "${baseUrl}account/login"
+    val URL_CREATE_USER = "${baseUrl}user/add"
+    val URL_GET_USER = "${baseUrl}user/byEmail/"
+    val URL_CREATE_POST = "${baseUrl}post/add"
+    val URL_READ_POST = "${baseUrl}post"
 }

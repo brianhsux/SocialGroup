@@ -203,6 +203,9 @@ class MainActivity : AppCompatActivity() {
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         if (item.itemId == android.R.id.home) {
             finish()
+        } else if (item.itemId == R.id.action_settings) {
+            val openSettingsIntent = Intent(this, SettingSectioned::class.java)
+            startActivity(openSettingsIntent)
         } else {
             Toast.makeText(applicationContext, item.title, Toast.LENGTH_SHORT).show()
         }

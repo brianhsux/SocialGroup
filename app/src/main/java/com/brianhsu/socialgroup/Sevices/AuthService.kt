@@ -23,7 +23,7 @@ object AuthService {
         jsonBody.put("password", password)
         val requestBody = jsonBody.toString()
 
-        val registerRequest = object : StringRequest(Method.POST, URL_REGISTER, Response.Listener {
+        val registerRequest = object : StringRequest(Method.POST, App.prefs.URL_REGISTER, Response.Listener {
             response ->
             println(response)
             complete(true)
@@ -49,7 +49,7 @@ object AuthService {
         jsonBody.put("password", password)
         val requestBody = jsonBody.toString()
 
-        val loginRequest = object : JsonObjectRequest(Method.POST, URL_LOGIN, null,
+        val loginRequest = object : JsonObjectRequest(Method.POST, App.prefs.URL_LOGIN, null,
                 Response.Listener { response ->
             try {
                 App.prefs.userEmail = response.getString("user")
@@ -89,7 +89,7 @@ object AuthService {
         jsonBody.put("gender", gender)
         val requestBody = jsonBody.toString()
 
-        val createRequest = object : JsonObjectRequest(Method.POST, URL_CREATE_USER, null, Response.Listener { response ->
+        val createRequest = object : JsonObjectRequest(Method.POST, App.prefs.URL_CREATE_USER, null, Response.Listener { response ->
 
             try {
                 UserDataServices.name = response.getString("name")
@@ -126,7 +126,7 @@ object AuthService {
     }
 
     fun findUserByEmail(context: Context, complete: (Boolean) -> Unit) {
-        val findUserRequest = object: JsonObjectRequest(Method.GET, "$URL_GET_USER${App.prefs.userEmail}", null, Response.Listener { response ->
+        val findUserRequest = object: JsonObjectRequest(Method.GET, "${App.prefs.URL_GET_USER}${App.prefs.userEmail}", null, Response.Listener { response ->
 
             try {
                 UserDataServices.name = response.getString("name")
