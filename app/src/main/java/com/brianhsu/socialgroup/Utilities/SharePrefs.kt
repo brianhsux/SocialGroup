@@ -17,6 +17,7 @@ class SharePrefs(context: Context) {
     val IS_LOGGED_IN = "isLoggedIn"
     val BASE_URL = "baseUrl"
     val IS_DEBUG_MODE = "isDebugMode"
+    var POST_CONTENT = "postContent"
 
     val BASE_C9_URL = "https://webdevbootcamp-brianhsux.c9users.io/v1/"
     val BASE_HEROKU_URL = "https://socialgroupapi.herokuapp.com/v1/"
@@ -40,6 +41,10 @@ class SharePrefs(context: Context) {
     var isDebugMode: Boolean
         get() = prefs.getBoolean(IS_DEBUG_MODE, false)
         set(value) = prefs.edit().putBoolean(IS_DEBUG_MODE, value).apply()
+
+    var postContent: String
+        get() = prefs.getString(POST_CONTENT, "")
+        set(value) = prefs.edit().putString(POST_CONTENT, value).apply()
 
     val requestQueue = Volley.newRequestQueue(context)
 

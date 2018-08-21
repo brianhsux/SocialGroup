@@ -1,12 +1,14 @@
 package com.brianhsu.socialgroup.controller
 
-import android.content.BroadcastReceiver
-import android.content.Context
-import android.content.Intent
-import android.content.IntentFilter
+import android.app.Activity
+import android.content.*
 import android.graphics.Color
+import android.net.Uri
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
+import android.os.Handler
+import android.os.HandlerThread
+import android.provider.DocumentsContract
 import android.support.design.widget.NavigationView
 import android.support.design.widget.Snackbar
 import android.support.v4.content.LocalBroadcastManager
@@ -19,12 +21,13 @@ import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import android.widget.Toast
+import com.brianhsu.socialgroup.Adapters.ResourcesAdapter
 import com.brianhsu.socialgroup.R
+import com.brianhsu.socialgroup.Sevices.CloudinaryService
 import com.brianhsu.socialgroup.Sevices.PostService
 import com.brianhsu.socialgroup.Sevices.UserDataServices
-import com.brianhsu.socialgroup.Utilities.BROADCAST_USER_DATA_CHANGE
-import com.brianhsu.socialgroup.Utilities.Tools
-import com.brianhsu.socialgroup.Utilities.TAG
+import com.brianhsu.socialgroup.Utilities.*
+import com.brianhsu.socialgroup.model.Resource
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.include_drawer_header_news.*
 
@@ -40,6 +43,10 @@ class MainActivity : AppCompatActivity() {
     var debugTag: String = "MainActivity"
 
     private var parent_view: View? = null
+    private var backgroundHandler: Handler? = null
+
+    private var postsDataChangedReceiver: BroadcastReceiver? = null
+    private var postsSendActionReceiver: BroadcastReceiver? = null
 
     private val userDataChangeReceiver = object: BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent?) {
@@ -65,6 +72,86 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    private fun unregisterPostsDataReceiver() {
+        if (postsDataChangedReceiver != null) {
+            LocalBroadcastManager.getInstance(this).unregisterReceiver(postsDataChangedReceiver!!)
+        }
+    }
+
+    private fun registerPostsDataReceiver() {
+        val filter = IntentFilter(CloudinaryService.ACTION_RESOURCE_MODIFIED)
+        filter.addAction(CloudinaryService.ACTION_UPLOAD_PROGRESS)
+        postsDataChangedReceiver = object : BroadcastReceiver() {
+            override fun onReceive(context: Context, intent: Intent) {
+                if (!isFinishing) {
+                    if (CloudinaryService.ACTION_RESOURCE_MODIFIED == intent.action) {
+                        val resource = intent.getSerializableExtra("resource") as Resource
+
+                        if (!resource.cloudinaryPublicId.isNullOrEmpty()) {
+                            PostService.createPost(UserDataServices.email, UserDataServices.name,
+                                    UserDataServices.avatarName, resource.cloudinaryPublicId!!,
+                                    App.prefs.postContent, "TODO_POSTTIME") { createSuccess ->
+                                if (createSuccess) {
+                                    PostService.readAllPosts(context) { readSuccess ->
+                                        if (readSuccess) {
+                                            Log.d(TAG, "MainActivity>>>registerPostsDataReceiver()-1")
+                                            fragment1.refresh()
+                                            enableSpinner(false)
+                                        } else {
+                                            errorToast()
+                                        }
+                                    }
+                                } else {
+                                    errorToast()
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        if (postsDataChangedReceiver != null) {
+            LocalBroadcastManager.getInstance(this).registerReceiver(postsDataChangedReceiver!!, filter)
+        }
+    }
+
+    private fun registerPostsSendActionReceiver() {
+        val filter = IntentFilter(BROADCAST_SEND_POST_ACTION)
+        postsSendActionReceiver = object : BroadcastReceiver() {
+            override fun onReceive(context: Context, intent: Intent) {
+                enableSpinner(true)
+
+                val bundle: Bundle?
+                var uri: Uri? = null
+                var clip: ClipData? = null
+                var flags = 0
+
+                try {
+                    bundle = intent.getBundleExtra("EXTRA_BUNDLE")
+                    uri = bundle.getParcelable<Uri>("EXTRA_URI")
+                    clip = bundle.getParcelable<ClipData>("EXTRA_CLIP")
+                    flags = bundle.getInt("EXTRA_FLAGS")
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                }
+
+                uploadDataToCloudinary(uri, clip, flags)
+
+//                val takeFlags = flags and (Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION)
+//                if (uri != null) {
+//                    handleUriNew(uri, takeFlags)
+//                } else if (clip != null) {
+//                    for (i in 0 until clip.itemCount) {
+//                        handleUriNew(clip.getItemAt(i).uri, takeFlags)
+//                    }
+//                }
+            }
+        }
+        if (postsSendActionReceiver != null) {
+            LocalBroadcastManager.getInstance(this).registerReceiver(postsSendActionReceiver!!, filter)
+        }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -77,6 +164,27 @@ class MainActivity : AppCompatActivity() {
         parent_view = findViewById<View>(android.R.id.content)
         LocalBroadcastManager.getInstance(this).registerReceiver(userDataChangeReceiver,
                 IntentFilter(BROADCAST_USER_DATA_CHANGE))
+
+        registerPostsSendActionReceiver()
+        registerPostsDataReceiver()
+        val handlerThread = HandlerThread("MainActivityWorker")
+        handlerThread.start()
+        backgroundHandler = Handler(handlerThread.looper)
+
+        enableSpinner(true)
+        PostService.readAllPosts(this) { readSuccess ->
+            if (readSuccess) {
+                fragment1.refresh()
+                enableSpinner(false)
+            } else {
+                errorToast()
+            }
+        }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        unregisterPostsDataReceiver()
     }
 
     private fun initToolbar() {
@@ -111,8 +219,6 @@ class MainActivity : AppCompatActivity() {
             when (item.itemId) {
                 R.id.navigation_recent -> {
                     actionBar?.title = item.title
-//                    val titleRelease = item.title.toString() + " New Release"
-//                    newReleaseTitleTabStore.text = titleRelease
                     transaction.replace(R.id.fragment_container, fragment1)
                     transaction.addToBackStack(null)
                     transaction.commit()
@@ -120,8 +226,6 @@ class MainActivity : AppCompatActivity() {
                 }
                 R.id.navigation_favorites -> {
                     actionBar?.title = item.title
-//                    val titleRelease = item.title.toString() + " New Release"
-//                    newReleaseTitleTabStore.text = titleRelease
                     transaction.replace(R.id.fragment_container, fragment2)
                     transaction.addToBackStack(null)
                     transaction.commit()
@@ -129,8 +233,6 @@ class MainActivity : AppCompatActivity() {
                 }
                 R.id.navigation_nearby -> {
                     actionBar?.title = item.title
-//                    val titleRelease = item.title.toString() + " New Release"
-//                    newReleaseTitleTabStore.text = titleRelease
                     transaction.replace(R.id.fragment_container, fragment3)
                     transaction.addToBackStack(null)
                     transaction.commit()
@@ -168,15 +270,21 @@ class MainActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
-        Log.d(TAG, "MainActivity>>>onResume()")
-        PostService.readAllPosts(this) { readSuccess ->
-            if (readSuccess) {
-                Log.d(TAG, "MainActivity>>>onResume()-1")
-                fragment1.refresh()
-            } else {
-                Log.d(TAG, "MainActivity>>>onResume()-2")
-            }
+    }
+
+    fun enableSpinner(enable: Boolean) {
+        if (enable) {
+            loaddingSpinner.visibility = View.VISIBLE
+        } else {
+            loaddingSpinner.visibility = View.INVISIBLE
         }
+
+    }
+
+    fun errorToast() {
+        Toast.makeText(this, "Something went wrong, please try again.",
+                Toast.LENGTH_LONG).show()
+        enableSpinner(false)
     }
 
     private fun animateNavigation(hide: Boolean) {
@@ -243,5 +351,31 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
+    }
+
+    private fun uploadDataToCloudinary(uri: Uri?, clipData: ClipData?, flags: Int) {
+            val takeFlags = flags and (Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION)
+            if (uri != null) {
+                handleUriNew(uri, takeFlags)
+            } else if (clipData != null) {
+                for (i in 0 until clipData.itemCount) {
+                    handleUriNew(clipData.getItemAt(i).uri, takeFlags)
+                }
+            }
+    }
+
+    private fun handleUriNew(uri: Uri, flags: Int) {
+        backgroundHandler?.post({
+            if (DocumentsContract.isDocumentUri(applicationContext, uri)) {
+                contentResolver.takePersistableUriPermission(uri, flags)
+            }
+            val pair = Tools.getResourceNameAndType(applicationContext, uri)
+            val resource = Resource(uri.toString(), pair.first, pair.second)
+            uploadImageNew(resource)
+        })
+    }
+
+    private fun uploadImageNew(resource: Resource?) {
+        ResourceRepo.instance?.uploadResource(resource)
     }
 }

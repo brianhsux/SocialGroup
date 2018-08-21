@@ -42,7 +42,7 @@ class SocialWallFragment : Fragment() {
                 posts.add(Post("", "Bradley",  "photo_male_4", "hcu80lmm3ssjtoos6e0i", testString,"July 20, 2018 18:20:20"))
             }
 
-            posts.reverse()
+//            posts.reverse()
 
             //set data and list adapter
             val gridSectionAdapter = AdapterPostSectioned(activity!!, posts) {

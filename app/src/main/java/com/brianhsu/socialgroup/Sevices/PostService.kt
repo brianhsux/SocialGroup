@@ -66,7 +66,7 @@ object PostService {
             clearPosts()
 
             try {
-                Log.d(TAG, "readAllPosts: $response")
+//                Log.d(TAG, "readAllPosts: $response")
 
                 for (x in 0 until response.length()) {
                     val post = response.getJSONObject(x)

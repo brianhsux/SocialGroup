@@ -23,9 +23,6 @@ import com.brianhsu.socialgroup.model.Resource
 
 import com.cloudinary.android.callback.ErrorInfo
 import com.cloudinary.android.callback.ListenerService
-//import com.cloudinary.android.sample.R
-//import com.cloudinary.android.sample.model.Resource
-//import com.cloudinary.android.sample.persist.ResourceRepo
 
 import java.util.HashMap
 import java.util.concurrent.ConcurrentHashMap
