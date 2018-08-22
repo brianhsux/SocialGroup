@@ -13,9 +13,10 @@ import com.brianhsu.socialgroup.R
 import com.brianhsu.socialgroup.Utilities.TAG
 import com.brianhsu.socialgroup.Utilities.Tools
 import com.cloudinary.Transformation
-import com.cloudinary.Url
 import com.mikhaellopez.circularimageview.CircularImageView
 import com.cloudinary.android.MediaManager
+import java.text.SimpleDateFormat
+import java.util.*
 
 class AdapterPostSectioned(private val context: Context, private val posts: List<Post>,
                            private val itemClick: (Post) -> Unit) :
@@ -46,24 +47,33 @@ class AdapterPostSectioned(private val context: Context, private val posts: List
 
 
         fun bindPost(context: Context, posts: Post) {
-//            Tools.displayImageOriginal(context, userCircularImage, posts.authorImage)
-//            Tools.displayImageOriginal(context, postImage, posts.postImage)
             val authorImageId:String = posts.authorImageId
             val authorImageUrl:String = MediaManager.get().url().generate("userImage/$authorImageId.jpg")
             Tools.displayImageOriginal(context, userCircularImage, authorImageUrl)
 
-            val postImageId:String = posts.postImageId
-//            val postImageUrl:String = MediaManager.get().url().generate("$postImageId.webp")
+            val postImageSourcePath:String = posts.postImageId
             val transformation: Transformation<*> = MediaManager.get().url().transformation().width(250).height(250).gravity("faces").crop("fill")
-            val postImageUrl:String = MediaManager.get().url().transformation(transformation).generate("$postImageId.webp")
+            val postImageUrl:String = MediaManager.get().url().transformation(transformation).generate("$postImageSourcePath.webp")
 
             Tools.displayImageOriginal(context, postImage, postImageUrl)
 
             userName?.text = posts.authorName
-            timeStamp?.text = posts.postTime
+            timeStamp?.text = formatPostDate(posts.postTime)
             postContent?.text = posts.postContent
+        }
 
-//            Log.d(TAG, "AdapterPostSectioned>>>bindPost()")
+        private fun formatPostDate(postDate: String?): String {
+            var finalStr = ""
+            try {
+                val inputFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.ENGLISH)
+                inputFormat.timeZone = TimeZone.getTimeZone("GMT")
+                val outputFormat = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.ENGLISH)
+                finalStr = outputFormat.format(inputFormat.parse(postDate))
+            } catch (e:Exception) {
+                Log.d(TAG, "AdapterPostSectioned(), error: ${e.printStackTrace()}")
+            }
+
+            return finalStr
         }
     }
 }

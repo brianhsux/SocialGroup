@@ -358,4 +358,19 @@ object Tools {
         canvas.drawBitmap(bitmap, rect, rect, paint)
         return output
     }
+
+//    fun toDateStringFromIso(sdate: String?): String {
+//        if ("null" == sdate || "NULL" == sdate || "" == sdate || sdate == null) { return "" }
+//        val d1:Date? = null
+//        try {
+//            d1 = dateFormaterIsodate.get().parse(sdate);
+//            sharecalendar.setTime(d1)
+//            sharecalendar.set(Calendar.HOUR_OF_DAY, sharecalendar.get(Calendar.HOUR_OF_DAY)+8);
+//            d1 = sharecalendar.getTime()
+//        } catch (e: Exception) {
+//            e.printStackTrace()
+//            return ""
+//        }
+//        return dateFormater4.get().format(d1)
+//    }
 }

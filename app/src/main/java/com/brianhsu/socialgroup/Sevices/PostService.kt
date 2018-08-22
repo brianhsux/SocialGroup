@@ -66,7 +66,7 @@ object PostService {
             clearPosts()
 
             try {
-//                Log.d(TAG, "readAllPosts: $response")
+                Log.d(TAG, "readAllPosts: $response")
 
                 for (x in 0 until response.length()) {
                     val post = response.getJSONObject(x)
@@ -76,7 +76,7 @@ object PostService {
                     val authorImageId = post.getString("authorImage")
                     val postImageId = post.getString("postImage")
                     val postContent = post.getString("postContent")
-                    val postTime = post.getString("postTime")
+                    val postTime = post.getString("date")
 
                     val newPost = Post(authorEmail, authorName, authorImageId, postImageId, postContent, postTime)
                     this.posts.add(newPost)

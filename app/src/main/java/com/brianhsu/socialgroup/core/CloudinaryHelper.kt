@@ -14,6 +14,7 @@ import com.cloudinary.android.UploadRequest
 import com.cloudinary.android.policy.TimeWindow
 import com.cloudinary.android.preprocess.BitmapEncoder
 import com.cloudinary.android.preprocess.ImagePreprocessChain
+import com.cloudinary.utils.ObjectUtils
 import java.util.*
 
 object CloudinaryHelper {
@@ -23,6 +24,7 @@ object CloudinaryHelper {
 
     fun uploadResource(resource: Resource?, preprocess: Boolean): String {
         val request = MediaManager.get().upload(Uri.parse(resource?.localUri))
+                .option("folder", "SocialGroup/postImage/")
                 .unsigned("sample_app_preset")
                 .constrain(TimeWindow.getDefault())
                 .option("resource_type", "auto")
