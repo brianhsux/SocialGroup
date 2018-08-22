@@ -23,6 +23,7 @@ import android.view.View
 import android.widget.Toast
 import com.brianhsu.socialgroup.Adapters.ResourcesAdapter
 import com.brianhsu.socialgroup.R
+import com.brianhsu.socialgroup.Sevices.AuthService
 import com.brianhsu.socialgroup.Sevices.CloudinaryService
 import com.brianhsu.socialgroup.Sevices.PostService
 import com.brianhsu.socialgroup.Sevices.UserDataServices
@@ -94,7 +95,6 @@ class MainActivity : AppCompatActivity() {
                                 if (createSuccess) {
                                     PostService.readAllPosts(context) { readSuccess ->
                                         if (readSuccess) {
-                                            Log.d(TAG, "MainActivity>>>registerPostsDataReceiver()-1")
                                             fragment1.refresh()
                                             enableSpinner(false)
                                         } else {
@@ -136,15 +136,6 @@ class MainActivity : AppCompatActivity() {
                 }
 
                 uploadDataToCloudinary(uri, clip, flags)
-
-//                val takeFlags = flags and (Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION)
-//                if (uri != null) {
-//                    handleUriNew(uri, takeFlags)
-//                } else if (clip != null) {
-//                    for (i in 0 until clip.itemCount) {
-//                        handleUriNew(clip.getItemAt(i).uri, takeFlags)
-//                    }
-//                }
             }
         }
         if (postsSendActionReceiver != null) {
@@ -178,6 +169,16 @@ class MainActivity : AppCompatActivity() {
                 enableSpinner(false)
             } else {
                 errorToast()
+            }
+        }
+
+        if (App.prefs.isLoggedIn) {
+            AuthService.findUserByEmail(this) { findSuccess ->
+                if (findSuccess) {
+                    enableSpinner(false)
+                } else {
+                    errorToast()
+                }
             }
         }
     }
@@ -270,6 +271,7 @@ class MainActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
+        Log.d(TAG, "userEmail: ${App.prefs.userEmail}")
     }
 
     fun enableSpinner(enable: Boolean) {
@@ -343,7 +345,7 @@ class MainActivity : AppCompatActivity() {
     fun newPostFabBtnClicked(view: View) {
         val createPostIntent = Intent(this, CreatePostActivity::class.java)
 
-        if (App.prefs.isLoggedIn) {
+        if (App.prefs.isLoggedIn && App.prefs.userEmail.isNotEmpty()) {
             startActivity(createPostIntent)
         } else {
             if (parent_view != null) {

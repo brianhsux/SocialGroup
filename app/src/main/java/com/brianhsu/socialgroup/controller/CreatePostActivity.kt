@@ -39,8 +39,6 @@ class CreatePostActivity : AppCompatActivity() {
     private var recyclerView: RecyclerView? = null
     private var dividerSize: Int = 0
     private val statuses = listOf(Resource.UploadStatus.QUEUED)
-    private var receiver: BroadcastReceiver? = null
-
     private var selectData: Intent? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -53,14 +51,8 @@ class CreatePostActivity : AppCompatActivity() {
         val handlerThread = HandlerThread("MainActivityWorker")
         handlerThread.start()
         backgroundHandler = Handler(handlerThread.looper)
-//        registerLocalReceiver()
         startService(Intent(this, CloudinaryService::class.java))
         enableSpinner(false)
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-//        unregisterLocalReceiver()
     }
 
     public override fun onResume() {
@@ -83,66 +75,12 @@ class CreatePostActivity : AppCompatActivity() {
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         if (resultCode == Activity.RESULT_OK) {
-//            if (requestCode == ImageActivity.UPLOAD_IMAGE_REQUEST_CODE) {
-//                // if the user chose to upload right now we want to schedule an immediate upload:
-//                uploadImage(data?.getSerializableExtra(ImageActivity.RESOURCE_INTENT_EXTRA) as Resource)
-//            } else if (requestCode == CHOOSE_IMAGE_REQUEST_CODE && data != null) {
-//                uploadImageFromIntentUri(data)
-//                selectData = data
-//            }
-
             if (requestCode == CHOOSE_IMAGE_REQUEST_CODE && data != null) {
-                Log.d(TAG, "CreatePostActivity>>>onActivityResult()-1")
                 uploadImageFromIntentUri(data)
                 selectData = data
             }
         }
     }
-
-//    private fun unregisterLocalReceiver() {
-//        if (receiver != null) {
-//            LocalBroadcastManager.getInstance(this).unregisterReceiver(receiver!!)
-//        }
-//    }
-
-//    private fun registerLocalReceiver() {
-//        val filter = IntentFilter(CloudinaryService.ACTION_RESOURCE_MODIFIED)
-//        filter.addAction(CloudinaryService.ACTION_UPLOAD_PROGRESS)
-//        receiver = object : BroadcastReceiver() {
-//            override fun onReceive(context: Context, intent: Intent) {
-//                if (!isFinishing) {
-//                    if (CloudinaryService.ACTION_RESOURCE_MODIFIED == intent.action) {
-//                        val resource = intent.getSerializableExtra("resource") as Resource
-//
-//                        if (!resource.cloudinaryPublicId.isNullOrEmpty()) {
-//                            PostService.createPost(UserDataServices.email, UserDataServices.name,
-//                                    UserDataServices.avatarName, resource.cloudinaryPublicId!!,
-//                                    contentCreatePost.text.toString(), "TODO_POSTTIME") { createSuccess ->
-//                                if (createSuccess) {
-//                                    enableSpinner(false)
-//                                    finish()
-//                                } else {
-//                                    errorToast()
-//                                }
-//                            }
-//                        }
-//
-//                        resourceUpdated(resource)
-//                    } else if (CloudinaryService.ACTION_UPLOAD_PROGRESS == intent.action) {
-//                        val requestId = intent.getStringExtra("requestId")
-//                        val bytes = intent.getLongExtra("bytes", 0)
-//                        val totalBytes = intent.getLongExtra("totalBytes", 0)
-//
-//                        val adapter = recyclerView?.adapter as ResourcesAdapter
-//                        adapter.progressUpdated(requestId, bytes, totalBytes)
-//                    }
-//                }
-//            }
-//        }
-//        if (receiver != null) {
-//            LocalBroadcastManager.getInstance(this).registerReceiver(receiver!!, filter)
-//        }
-//    }
 
     private fun initToolbar() {
         setSupportActionBar(mainToolbar)
@@ -185,51 +123,15 @@ class CreatePostActivity : AppCompatActivity() {
         return super.onOptionsItemSelected(item)
     }
 
-//    private fun uploadDataToCloudinary() {
-//        if (selectData != null) {
-//            val takeFlags = selectData!!.flags and (Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION)
-//            val uri = selectData!!.data
-//            if (uri != null) {
-//                handleUriNew(uri, takeFlags)
-//            } else if (selectData!!.clipData != null) {
-//                val clip = selectData!!.clipData
-//                for (i in 0 until clip!!.itemCount) {
-//                    handleUriNew(clip.getItemAt(i).uri, takeFlags)
-//                }
-//            }
-//        }
-//    }
-
-//    private fun handleUriNew(uri: Uri, flags: Int) {
-//        backgroundHandler?.post({
-//            if (DocumentsContract.isDocumentUri(applicationContext, uri)) {
-//                contentResolver.takePersistableUriPermission(uri, flags)
-//            }
-//
-//            val pair = Tools.getResourceNameAndType(applicationContext, uri)
-//            val resource = Resource(uri.toString(), pair.first, pair.second)
-//            uploadImageNew(resource)
-//        })
-//    }
-
-//    private fun uploadImageNew(resource: Resource?) {
-//        Log.d(TAG, "CreatePostActivity>>>uploadImageNew(), resource name: " + resource?.name +
-//        ", resource url: " + resource?.localUri)
-//        ResourceRepo.instance?.uploadResource(resource)
-//    }
-
     private fun doSendPostAction() {
         enableSpinner(true)
         App.prefs.postContent = contentCreatePost.text.toString()
         // 1. Upload the image to the cloudinary
-//        uploadDataToCloudinary()
         // 2. Get the url of the image in cloudinary
         // 3. Send the post request with the social group api to server
         // 4. If success, goto SocialWallFragment and refresh the adapter in it.
 
-
         val sendPostAction = Intent(BROADCAST_SEND_POST_ACTION)
-//        sendPostAction.putExtra(BROADCAST_SEND_POST_ACTION, selectData)
         val bundle = Bundle()
         bundle.putParcelable("EXTRA_URI", selectData?.data)
         bundle.putParcelable("EXTRA_CLIP", selectData?.clipData)
@@ -237,19 +139,6 @@ class CreatePostActivity : AppCompatActivity() {
         sendPostAction.putExtra("EXTRA_BUNDLE", bundle)
 
         LocalBroadcastManager.getInstance(this).sendBroadcast(sendPostAction)
-
-        Log.d(TAG, "CreatePostActivity>>>doSendPostAction()-3, uri: ${selectData?.data}, clip: ${selectData?.clipData}, flags: ${selectData?.flags}")
-
-//        val intent = Intent()
-//        val bundle = Bundle()
-//        bundle.putParcelable("EXTRA_URI", selectData?.data)
-//        bundle.putParcelable("EXTRA_CLIP", selectData?.clipData)
-//        bundle.putInt("EXTRA_FLAGS", selectData!!.flags)
-//        intent.putExtra("EXTRA_BUNDLE", bundle)
-//        intent.putExtra("EXTRA_URI", selectData?.data)
-//        intent.putExtra("EXTRA_CLIP", selectData?.clipData)
-//        intent.putExtra("EXTRA_FLAGS", selectData?.flags)
-//        setResult(SEND_POST_ACTION_RESULT_CODE, intent)
         finish()
     }
 
@@ -269,19 +158,6 @@ class CreatePostActivity : AppCompatActivity() {
             }
         }
     }
-
-//    private fun uploadImage(resource: Resource?) {
-//        resourceUpdated(ResourceRepo.instance?.uploadResource(resource))
-//    }
-
-//    private fun resourceUpdated(resource: Resource?) {
-//        runOnUiThread {
-//            val adapter = recyclerView?.adapter as ResourcesAdapter
-//            if (resource != null) {
-//                adapter.resourceUpdated(resource)
-//            }
-//        }
-//    }
 
     private fun uploadImageFromIntentUri(data: Intent) {
         val takeFlags = data.flags and (Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION)
@@ -370,11 +246,5 @@ class CreatePostActivity : AppCompatActivity() {
         contentCreatePost.isEnabled = !enable
         galleryCreatePost.isEnabled = !enable
         fabAddGallery.isEnabled = !enable
-    }
-
-    fun errorToast() {
-        Toast.makeText(this, "Something went wrong, please try again.",
-                Toast.LENGTH_LONG).show()
-        enableSpinner(false)
     }
 }

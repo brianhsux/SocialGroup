@@ -22,12 +22,10 @@ class AdapterPostSectioned(private val context: Context, private val posts: List
                            private val itemClick: (Post) -> Unit) :
         RecyclerView.Adapter<AdapterPostSectioned.ViewHolder>() {
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-//        Log.d(TAG, "AdapterPostSectioned>>>onBindViewHolder()")
         holder.bindPost(context, posts[position])
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
-//        Log.d(TAG, "AdapterPostSectioned>>>onCreateViewHolder()")
         val view = LayoutInflater.from(context).inflate(R.layout.post_card_list_view, parent, false)
         return ViewHolder(view, itemClick)
 //        return ViewHolder(view)
