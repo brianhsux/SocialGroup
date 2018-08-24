@@ -1,15 +1,21 @@
 package com.brianhsu.socialgroup.Adapters
 
 import android.content.Context
+import android.content.Intent
+import android.os.Bundle
 import android.support.v7.widget.RecyclerView
+import android.support.v4.content.LocalBroadcastManager
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.TextView
+import android.widget.Toast
 import com.brianhsu.socialgroup.model.Post
 import com.brianhsu.socialgroup.R
+import com.brianhsu.socialgroup.Utilities.BROADCAST_POST_MORE_INFO_DIALOG
 import com.brianhsu.socialgroup.Utilities.TAG
 import com.brianhsu.socialgroup.Utilities.Tools
 import com.cloudinary.Transformation
@@ -42,6 +48,7 @@ class AdapterPostSectioned(private val context: Context, private val posts: List
         var timeStamp = itemView?.findViewById<TextView>(R.id.postTimeStamp)
         var postContent = itemView?.findViewById<TextView>(R.id.postContent)
         var postImage = itemView?.findViewById<ImageView>(R.id.postImage)
+        var postMoreInfoBtn = itemView?.findViewById<ImageButton>(R.id.postMoreInfoBtn)
 
 
         fun bindPost(context: Context, posts: Post) {
@@ -58,6 +65,17 @@ class AdapterPostSectioned(private val context: Context, private val posts: List
             userName?.text = posts.authorName
             timeStamp?.text = formatPostDate(posts.postTime)
             postContent?.text = posts.postContent
+
+            postMoreInfoBtn?.setOnClickListener {
+                Toast.makeText(context, "Ｍore info with postId: ${posts.postId}", Toast.LENGTH_LONG).show()
+
+                val sendPostAction = Intent(BROADCAST_POST_MORE_INFO_DIALOG)
+                val bundle = Bundle()
+                bundle.putString("EXTRA_POST_ID", posts.postId)
+                sendPostAction.putExtra("EXTRA_BUNDLE", bundle)
+
+                LocalBroadcastManager.getInstance(context).sendBroadcast(sendPostAction)
+            }
         }
 
         private fun formatPostDate(postDate: String?): String {

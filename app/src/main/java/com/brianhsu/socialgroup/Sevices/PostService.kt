@@ -6,8 +6,6 @@ import com.android.volley.Response
 import com.android.volley.toolbox.JsonArrayRequest
 import com.android.volley.toolbox.JsonObjectRequest
 import com.brianhsu.socialgroup.Utilities.TAG
-import com.brianhsu.socialgroup.Utilities.URL_CREATE_POST
-import com.brianhsu.socialgroup.Utilities.URL_READ_POST
 import com.brianhsu.socialgroup.controller.App
 import com.brianhsu.socialgroup.model.Post
 import org.json.JSONException
@@ -18,7 +16,7 @@ object PostService {
     val posts = ArrayList<Post>()
 
     fun createPost(authorEmail: String, authorName: String, authorImage: String, postImage: String,
-                   postContent: String, postTime: String, complete: (Boolean) -> Unit) {
+                   postContent: String, complete: (Boolean) -> Unit) {
         Log.d(TAG, "PostService>>>createPost()-1")
         val jsonBody = JSONObject()
 
@@ -27,7 +25,6 @@ object PostService {
         jsonBody.put("authorImage", authorImage)
         jsonBody.put("postImage", postImage)
         jsonBody.put("postContent", postContent)
-        jsonBody.put("postTime", postTime)
         val requestBody = jsonBody.toString()
 
         val createRequest = object : JsonObjectRequest(Method.POST, App.prefs.URL_CREATE_POST, null, Response.Listener { response ->
@@ -71,6 +68,7 @@ object PostService {
                 for (x in 0 until response.length()) {
                     val post = response.getJSONObject(x)
 
+                    val postId = post.getString("_id")
                     val authorEmail = post.getString("authorEmail")
                     val authorName = post.getString("authorName")
                     val authorImageId = post.getString("authorImage")
@@ -78,7 +76,7 @@ object PostService {
                     val postContent = post.getString("postContent")
                     val postTime = post.getString("date")
 
-                    val newPost = Post(authorEmail, authorName, authorImageId, postImageId, postContent, postTime)
+                    val newPost = Post(postId, authorEmail, authorName, authorImageId, postImageId, postContent, postTime)
                     this.posts.add(newPost)
                 }
 

@@ -36,10 +36,10 @@ class SocialWallFragment : Fragment() {
             val posts = PostService.posts
 
             if (posts.size == 0) {
-                posts.add(Post("", "Brian",  "photo_male_1", "bcnkrwniruyzworepuuf", testString, "Aug 20, 2018 18:20:20"))
-                posts.add(Post("", "Joanna",  "photo_female_3", "edpftd8fyhgd4pmq1xof", testString, "Sep 20, 2018 18:20:20"))
-                posts.add(Post("", "Odin",  "photo_male_3", "qenujzureigckg1hcgtm", testString,"Dec 20, 2018 18:20:20" ))
-                posts.add(Post("", "Bradley",  "photo_male_4", "hcu80lmm3ssjtoos6e0i", testString,"July 20, 2018 18:20:20"))
+                posts.add(Post("", "", "Brian",  "photo_male_1", "bcnkrwniruyzworepuuf", testString, "Aug 20, 2018 18:20:20"))
+                posts.add(Post("", "", "Joanna",  "photo_female_3", "edpftd8fyhgd4pmq1xof", testString, "Sep 20, 2018 18:20:20"))
+                posts.add(Post("", "", "Odin",  "photo_male_3", "qenujzureigckg1hcgtm", testString,"Dec 20, 2018 18:20:20" ))
+                posts.add(Post("", "", "Bradley",  "photo_male_4", "hcu80lmm3ssjtoos6e0i", testString,"July 20, 2018 18:20:20"))
             }
 
 //            posts.reverse()

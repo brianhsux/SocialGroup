@@ -113,6 +113,13 @@
             android:layout_marginStart="8dp"
             android:layout_marginTop="8dp" />
 
+        <!--bottom sheet container-->
+        <FrameLayout
+            android:id="@+id/bottom_sheet"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:layout_behavior="@string/bottom_sheet_behavior" />
+
     </android.support.design.widget.CoordinatorLayout>
 
     <!--navigation drawer menu-->

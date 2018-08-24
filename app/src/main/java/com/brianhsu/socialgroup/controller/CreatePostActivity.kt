@@ -1,17 +1,14 @@
 package com.brianhsu.socialgroup.controller
 
 import android.app.Activity
-import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
-import android.content.IntentFilter
 import android.net.Uri
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.os.Handler
 import android.os.HandlerThread
 import android.provider.DocumentsContract
-import android.provider.SyncStateContract
 import android.support.v4.content.LocalBroadcastManager
 import android.support.v7.widget.GridLayoutManager
 import android.support.v7.widget.RecyclerView
@@ -21,11 +18,9 @@ import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewTreeObserver
-import android.widget.Toast
 import com.brianhsu.socialgroup.Adapters.ResourcesAdapter
 import com.brianhsu.socialgroup.R
 import com.brianhsu.socialgroup.Sevices.CloudinaryService
-import com.brianhsu.socialgroup.Sevices.PostService
 import com.brianhsu.socialgroup.Sevices.UserDataServices
 import com.brianhsu.socialgroup.Utilities.*
 import com.brianhsu.socialgroup.model.Resource

@@ -4,11 +4,14 @@ import android.app.Activity
 import android.content.*
 import android.graphics.Color
 import android.net.Uri
+import android.os.Build
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.os.Handler
 import android.os.HandlerThread
 import android.provider.DocumentsContract
+import android.support.design.widget.BottomSheetBehavior
+import android.support.design.widget.BottomSheetDialog
 import android.support.design.widget.NavigationView
 import android.support.design.widget.Snackbar
 import android.support.v4.content.LocalBroadcastManager
@@ -20,6 +23,7 @@ import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
+import android.view.WindowManager
 import android.widget.Toast
 import com.brianhsu.socialgroup.Adapters.ResourcesAdapter
 import com.brianhsu.socialgroup.R
@@ -48,6 +52,10 @@ class MainActivity : AppCompatActivity() {
 
     private var postsDataChangedReceiver: BroadcastReceiver? = null
     private var postsSendActionReceiver: BroadcastReceiver? = null
+    private var postMoreInfoDialogReceiver: BroadcastReceiver? = null
+
+    private var mBehavior: BottomSheetBehavior<View>? = null
+    private var mBottomSheetDialog: BottomSheetDialog? = null
 
     private val userDataChangeReceiver = object: BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent?) {
@@ -91,7 +99,7 @@ class MainActivity : AppCompatActivity() {
                         if (!resource.cloudinaryPublicId.isNullOrEmpty()) {
                             PostService.createPost(UserDataServices.email, UserDataServices.name,
                                     UserDataServices.avatarName, resource.cloudinaryPublicId!!,
-                                    App.prefs.postContent, "TODO_POSTTIME") { createSuccess ->
+                                    App.prefs.postContent) { createSuccess ->
                                 if (createSuccess) {
                                     PostService.readAllPosts(context) { readSuccess ->
                                         if (readSuccess) {
@@ -143,6 +151,28 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    private fun registerPostMoreInfoDialogReceiver() {
+        val filter = IntentFilter(BROADCAST_POST_MORE_INFO_DIALOG)
+        postMoreInfoDialogReceiver = object : BroadcastReceiver() {
+            override fun onReceive(context: Context?, intent: Intent?) {
+                Log.d(TAG, "registerPostMoreInfoDialogReceiver>>>onReceive()")
+
+                val bundle: Bundle?
+                var postId: String? = ""
+                try {
+                    bundle = intent?.getBundleExtra("EXTRA_BUNDLE")
+                    postId = bundle?.getString("EXTRA_POST_ID")
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                }
+                showBottomSheetDialog(postId)
+            }
+        }
+        if (postMoreInfoDialogReceiver != null) {
+            LocalBroadcastManager.getInstance(this).registerReceiver(postMoreInfoDialogReceiver!!, filter)
+        }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -158,6 +188,8 @@ class MainActivity : AppCompatActivity() {
 
         registerPostsSendActionReceiver()
         registerPostsDataReceiver()
+        registerPostMoreInfoDialogReceiver()
+
         val handlerThread = HandlerThread("MainActivityWorker")
         handlerThread.start()
         backgroundHandler = Handler(handlerThread.looper)
@@ -256,6 +288,9 @@ class MainActivity : AppCompatActivity() {
 //                animateSearchBar(true)
 //            }
 //        })
+
+
+        mBehavior = BottomSheetBehavior.from<View>(bottom_sheet)
     }
 
     private fun initFragment() {
@@ -379,5 +414,31 @@ class MainActivity : AppCompatActivity() {
 
     private fun uploadImageNew(resource: Resource?) {
         ResourceRepo.instance?.uploadResource(resource)
+    }
+
+    private fun showBottomSheetDialog(postId: String?) {
+        Log.d(TAG, "showBottomSheetDialog>>>postId: $postId")
+        if (mBehavior?.state == BottomSheetBehavior.STATE_EXPANDED) {
+            mBehavior?.state = BottomSheetBehavior.STATE_COLLAPSED
+        }
+
+        val view = layoutInflater.inflate(R.layout.sheet_list, null)
+
+        (view.findViewById(R.id.lyt_preview) as View).setOnClickListener { Toast.makeText(applicationContext, "Preview '" + "' clicked", Toast.LENGTH_SHORT).show() }
+
+        (view.findViewById(R.id.lyt_share) as View).setOnClickListener { Toast.makeText(applicationContext, "Share '" + "' clicked", Toast.LENGTH_SHORT).show() }
+
+        (view.findViewById(R.id.lyt_get_link) as View).setOnClickListener { Toast.makeText(applicationContext, "Get link '" + "' clicked", Toast.LENGTH_SHORT).show() }
+
+        (view.findViewById(R.id.lyt_make_copy) as View).setOnClickListener { Toast.makeText(applicationContext, "Make a copy '" + "' clicked", Toast.LENGTH_SHORT).show() }
+
+        mBottomSheetDialog = BottomSheetDialog(this)
+        mBottomSheetDialog?.setContentView(view)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            mBottomSheetDialog?.window!!.addFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS)
+        }
+
+        mBottomSheetDialog?.show()
+        mBottomSheetDialog?.setOnDismissListener(DialogInterface.OnDismissListener { mBottomSheetDialog = null })
     }
 }
