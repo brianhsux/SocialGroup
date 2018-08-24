@@ -1,6 +1,5 @@
 package com.brianhsu.socialgroup.controller
 
-import android.app.Activity
 import android.content.*
 import android.graphics.Color
 import android.net.Uri
@@ -25,7 +24,6 @@ import android.view.MenuItem
 import android.view.View
 import android.view.WindowManager
 import android.widget.Toast
-import com.brianhsu.socialgroup.Adapters.ResourcesAdapter
 import com.brianhsu.socialgroup.R
 import com.brianhsu.socialgroup.Sevices.AuthService
 import com.brianhsu.socialgroup.Sevices.CloudinaryService
@@ -67,6 +65,8 @@ class MainActivity : AppCompatActivity() {
                 userImageNavHeader.setImageResource(resourceId)
 
                 loginBtnNavHeader.text = "Logout"
+
+                refreshSocialWallUi()
 
 //                MessageService.getChannels { complete ->
 //                    if (complete) {
@@ -123,6 +123,12 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    private fun unregisterSendActionReceiver() {
+        if (postsSendActionReceiver != null) {
+            LocalBroadcastManager.getInstance(this).unregisterReceiver(postsSendActionReceiver!!)
+        }
+    }
+
     private fun registerPostsSendActionReceiver() {
         val filter = IntentFilter(BROADCAST_SEND_POST_ACTION)
         postsSendActionReceiver = object : BroadcastReceiver() {
@@ -151,12 +157,16 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    private fun unregisterMoreInfoDialogReceiver() {
+        if (postMoreInfoDialogReceiver != null) {
+            LocalBroadcastManager.getInstance(this).unregisterReceiver(postMoreInfoDialogReceiver!!)
+        }
+    }
+
     private fun registerPostMoreInfoDialogReceiver() {
         val filter = IntentFilter(BROADCAST_POST_MORE_INFO_DIALOG)
         postMoreInfoDialogReceiver = object : BroadcastReceiver() {
             override fun onReceive(context: Context?, intent: Intent?) {
-                Log.d(TAG, "registerPostMoreInfoDialogReceiver>>>onReceive()")
-
                 val bundle: Bundle?
                 var postId: String? = ""
                 try {
@@ -170,6 +180,17 @@ class MainActivity : AppCompatActivity() {
         }
         if (postMoreInfoDialogReceiver != null) {
             LocalBroadcastManager.getInstance(this).registerReceiver(postMoreInfoDialogReceiver!!, filter)
+        }
+    }
+
+    fun refreshSocialWallUi() {
+        PostService.readAllPosts(this) { readSuccess ->
+            if (readSuccess) {
+                fragment1.refresh()
+                enableSpinner(false)
+            } else {
+                errorToast()
+            }
         }
     }
 
@@ -218,6 +239,8 @@ class MainActivity : AppCompatActivity() {
     override fun onDestroy() {
         super.onDestroy()
         unregisterPostsDataReceiver()
+        unregisterSendActionReceiver()
+        unregisterMoreInfoDialogReceiver()
     }
 
     private fun initToolbar() {
@@ -369,7 +392,8 @@ class MainActivity : AppCompatActivity() {
             userImageNavHeader.setImageResource(R.drawable.profiledefault)
             userImageNavHeader.setBackgroundColor(Color.TRANSPARENT)
             loginBtnNavHeader.text = "Login"
-//            mainChannelName.text = "Please log in!!"
+
+            refreshSocialWallUi()
 
         } else {
             val loginIntent = Intent(this, LoginActivity::class.java)
@@ -417,20 +441,34 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun showBottomSheetDialog(postId: String?) {
-        Log.d(TAG, "showBottomSheetDialog>>>postId: $postId")
         if (mBehavior?.state == BottomSheetBehavior.STATE_EXPANDED) {
             mBehavior?.state = BottomSheetBehavior.STATE_COLLAPSED
         }
 
         val view = layoutInflater.inflate(R.layout.sheet_list, null)
 
-        (view.findViewById(R.id.lyt_preview) as View).setOnClickListener { Toast.makeText(applicationContext, "Preview '" + "' clicked", Toast.LENGTH_SHORT).show() }
+        (view.findViewById(R.id.lyt_edit_post) as View).setOnClickListener {
+            Toast.makeText(applicationContext, "Edit Post $postId", Toast.LENGTH_SHORT).show()
+        }
 
-        (view.findViewById(R.id.lyt_share) as View).setOnClickListener { Toast.makeText(applicationContext, "Share '" + "' clicked", Toast.LENGTH_SHORT).show() }
-
-        (view.findViewById(R.id.lyt_get_link) as View).setOnClickListener { Toast.makeText(applicationContext, "Get link '" + "' clicked", Toast.LENGTH_SHORT).show() }
-
-        (view.findViewById(R.id.lyt_make_copy) as View).setOnClickListener { Toast.makeText(applicationContext, "Make a copy '" + "' clicked", Toast.LENGTH_SHORT).show() }
+        (view.findViewById(R.id.lyt_delete_post) as View).setOnClickListener {
+            Toast.makeText(applicationContext, "Delete Post $postId", Toast.LENGTH_SHORT).show()
+            mBottomSheetDialog?.dismiss()
+            PostService.deletePostById(postId) { createSuccess ->
+                if (createSuccess) {
+                    PostService.readAllPosts(this) { readSuccess ->
+                        if (readSuccess) {
+                            fragment1.refresh()
+                            enableSpinner(false)
+                        } else {
+                            errorToast()
+                        }
+                    }
+                } else {
+                    errorToast()
+                }
+            }
+        }
 
         mBottomSheetDialog = BottomSheetDialog(this)
         mBottomSheetDialog?.setContentView(view)

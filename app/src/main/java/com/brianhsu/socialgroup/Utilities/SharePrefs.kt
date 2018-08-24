@@ -52,6 +52,8 @@ class SharePrefs(context: Context) {
     val URL_LOGIN = "${baseUrl}account/login"
     val URL_CREATE_USER = "${baseUrl}user/add"
     val URL_GET_USER = "${baseUrl}user/byEmail/"
+
     val URL_CREATE_POST = "${baseUrl}post/add"
     val URL_READ_POST = "${baseUrl}post"
+    val URL_DELETE_POST = "${baseUrl}post"
 }

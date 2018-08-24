@@ -18,6 +18,7 @@ import com.brianhsu.socialgroup.R
 import com.brianhsu.socialgroup.Utilities.BROADCAST_POST_MORE_INFO_DIALOG
 import com.brianhsu.socialgroup.Utilities.TAG
 import com.brianhsu.socialgroup.Utilities.Tools
+import com.brianhsu.socialgroup.controller.App
 import com.cloudinary.Transformation
 import com.mikhaellopez.circularimageview.CircularImageView
 import com.cloudinary.android.MediaManager
@@ -66,9 +67,14 @@ class AdapterPostSectioned(private val context: Context, private val posts: List
             timeStamp?.text = formatPostDate(posts.postTime)
             postContent?.text = posts.postContent
 
-            postMoreInfoBtn?.setOnClickListener {
-                Toast.makeText(context, "Ｍore info with postId: ${posts.postId}", Toast.LENGTH_LONG).show()
 
+            if (posts.authorEmail == App.prefs.userEmail) {
+                postMoreInfoBtn?.visibility = View.VISIBLE
+            } else {
+                postMoreInfoBtn?.visibility = View.INVISIBLE
+            }
+
+            postMoreInfoBtn?.setOnClickListener {
                 val sendPostAction = Intent(BROADCAST_POST_MORE_INFO_DIALOG)
                 val bundle = Bundle()
                 bundle.putString("EXTRA_POST_ID", posts.postId)

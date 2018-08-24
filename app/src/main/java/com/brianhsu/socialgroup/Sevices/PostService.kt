@@ -17,7 +17,6 @@ object PostService {
 
     fun createPost(authorEmail: String, authorName: String, authorImage: String, postImage: String,
                    postContent: String, complete: (Boolean) -> Unit) {
-        Log.d(TAG, "PostService>>>createPost()-1")
         val jsonBody = JSONObject()
 
         jsonBody.put("authorEmail", authorEmail)
@@ -96,5 +95,36 @@ object PostService {
 
     fun clearPosts() {
         posts.clear()
+    }
+
+    fun deletePostById(postId: String?, complete: (Boolean) -> Unit) {
+
+        val requestUrl = "${App.prefs.URL_DELETE_POST}/$postId"
+        Log.d(TAG, "PostService>>>deletePost()-1, postId: $postId, requestUrl: $requestUrl")
+
+        val deleteRequest = object : JsonObjectRequest(Method.DELETE, requestUrl, null, Response.Listener { response ->
+
+            try {
+                complete(true)
+            } catch (e: JSONException) {
+                Log.d(TAG, "EXC: " + e.localizedMessage)
+                complete(false)
+            }
+        }, Response.ErrorListener { error ->
+            Log.d(TAG, "Could not delete post $error")
+            complete(false)
+        }) {
+            override fun getBodyContentType(): String {
+                return "application/json; charset=utf-8"
+            }
+
+            override fun getHeaders(): MutableMap<String, String> {
+                val headers = HashMap<String, String>()
+                headers.put("Authorization", "Bearer ${App.prefs.authToken}")
+                return headers
+            }
+        }
+
+        App.prefs.requestQueue.add(deleteRequest)
     }
 }
