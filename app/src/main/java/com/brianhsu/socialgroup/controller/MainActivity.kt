@@ -55,6 +55,8 @@ class MainActivity : AppCompatActivity() {
     private var mBehavior: BottomSheetBehavior<View>? = null
     private var mBottomSheetDialog: BottomSheetDialog? = null
 
+    private var mIsRunning: Boolean = false
+
     private val userDataChangeReceiver = object: BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent?) {
             if (App.prefs.isLoggedIn) {
@@ -101,14 +103,7 @@ class MainActivity : AppCompatActivity() {
                                     UserDataServices.avatarName, resource.cloudinaryPublicId!!,
                                     App.prefs.postContent) { createSuccess ->
                                 if (createSuccess) {
-                                    PostService.readAllPosts(context) { readSuccess ->
-                                        if (readSuccess) {
-                                            fragment1.refresh()
-                                            enableSpinner(false)
-                                        } else {
-                                            errorToast()
-                                        }
-                                    }
+                                    refreshSocialWallUi()
                                 } else {
                                     errorToast()
                                 }
@@ -186,7 +181,12 @@ class MainActivity : AppCompatActivity() {
     fun refreshSocialWallUi() {
         PostService.readAllPosts(this) { readSuccess ->
             if (readSuccess) {
-                fragment1.refresh()
+                if (mIsRunning) {
+                    fragment1.refresh()
+                    App.prefs.needRefreshOnResume = false
+                } else {
+                    App.prefs.needRefreshOnResume = true
+                }
                 enableSpinner(false)
             } else {
                 errorToast()
@@ -203,6 +203,8 @@ class MainActivity : AppCompatActivity() {
         initComponent()
         initFragment()
 
+        mIsRunning = true
+
         parent_view = findViewById<View>(android.R.id.content)
         LocalBroadcastManager.getInstance(this).registerReceiver(userDataChangeReceiver,
                 IntentFilter(BROADCAST_USER_DATA_CHANGE))
@@ -216,14 +218,7 @@ class MainActivity : AppCompatActivity() {
         backgroundHandler = Handler(handlerThread.looper)
 
         enableSpinner(true)
-        PostService.readAllPosts(this) { readSuccess ->
-            if (readSuccess) {
-                fragment1.refresh()
-                enableSpinner(false)
-            } else {
-                errorToast()
-            }
-        }
+        refreshSocialWallUi()
 
         if (App.prefs.isLoggedIn) {
             AuthService.findUserByEmail(this) { findSuccess ->
@@ -277,21 +272,21 @@ class MainActivity : AppCompatActivity() {
                     actionBar?.title = item.title
                     transaction.replace(R.id.fragment_container, fragment1)
                     transaction.addToBackStack(null)
-                    transaction.commit()
+                    transaction.commitAllowingStateLoss()
                     return@setOnNavigationItemSelectedListener true
                 }
                 R.id.navigation_favorites -> {
                     actionBar?.title = item.title
                     transaction.replace(R.id.fragment_container, fragment2)
                     transaction.addToBackStack(null)
-                    transaction.commit()
+                    transaction.commitAllowingStateLoss()
                     return@setOnNavigationItemSelectedListener true
                 }
                 R.id.navigation_nearby -> {
                     actionBar?.title = item.title
                     transaction.replace(R.id.fragment_container, fragment3)
                     transaction.addToBackStack(null)
-                    transaction.commit()
+                    transaction.commitAllowingStateLoss()
                     return@setOnNavigationItemSelectedListener true
                 }
                 else -> {
@@ -329,7 +324,18 @@ class MainActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
+        mIsRunning = true
+
+        if (App.prefs.needRefreshOnResume) {
+            fragment1.refresh()
+        }
+
         Log.d(TAG, "userEmail: ${App.prefs.userEmail}")
+    }
+
+    override fun onPause() {
+        super.onPause()
+        mIsRunning = false
     }
 
     fun enableSpinner(enable: Boolean) {
@@ -456,14 +462,7 @@ class MainActivity : AppCompatActivity() {
             mBottomSheetDialog?.dismiss()
             PostService.deletePostById(postId) { createSuccess ->
                 if (createSuccess) {
-                    PostService.readAllPosts(this) { readSuccess ->
-                        if (readSuccess) {
-                            fragment1.refresh()
-                            enableSpinner(false)
-                        } else {
-                            errorToast()
-                        }
-                    }
+                    refreshSocialWallUi()
                 } else {
                     errorToast()
                 }
