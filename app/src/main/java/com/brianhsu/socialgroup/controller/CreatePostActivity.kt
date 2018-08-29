@@ -18,6 +18,7 @@ import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewTreeObserver
+import android.widget.Toast
 import com.brianhsu.socialgroup.Adapters.ResourcesAdapter
 import com.brianhsu.socialgroup.R
 import com.brianhsu.socialgroup.Sevices.CloudinaryService
@@ -119,22 +120,27 @@ class CreatePostActivity : AppCompatActivity() {
     }
 
     private fun doSendPostAction() {
-        enableSpinner(true)
         App.prefs.postContent = contentCreatePost.text.toString()
         // 1. Upload the image to the cloudinary
         // 2. Get the url of the image in cloudinary
         // 3. Send the post request with the social group api to server
         // 4. If success, goto SocialWallFragment and refresh the adapter in it.
 
-        val sendPostAction = Intent(BROADCAST_SEND_POST_ACTION)
-        val bundle = Bundle()
-        bundle.putParcelable("EXTRA_URI", selectData?.data)
-        bundle.putParcelable("EXTRA_CLIP", selectData?.clipData)
-        bundle.putInt("EXTRA_FLAGS", selectData!!.flags)
-        sendPostAction.putExtra("EXTRA_BUNDLE", bundle)
+        if (selectData != null) {
+            val sendPostAction = Intent(BROADCAST_SEND_POST_ACTION)
+            val bundle = Bundle()
+            bundle.putParcelable("EXTRA_URI", selectData?.data)
+            bundle.putParcelable("EXTRA_CLIP", selectData?.clipData)
+            bundle.putInt("EXTRA_FLAGS", selectData!!.flags)
+            sendPostAction.putExtra("EXTRA_BUNDLE", bundle)
 
-        LocalBroadcastManager.getInstance(this).sendBroadcast(sendPostAction)
-        finish()
+            LocalBroadcastManager.getInstance(this).sendBroadcast(sendPostAction)
+            enableSpinner(true)
+            finish()
+        } else {
+            Toast.makeText(applicationContext, "Choose a image to share.", Toast.LENGTH_SHORT).show()
+        }
+
     }
 
     fun uploadGalleryFabBtnClicked(view: View) {
