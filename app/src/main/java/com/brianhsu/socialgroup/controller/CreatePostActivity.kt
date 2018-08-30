@@ -48,7 +48,6 @@ class CreatePostActivity : AppCompatActivity() {
         handlerThread.start()
         backgroundHandler = Handler(handlerThread.looper)
         startService(Intent(this, CloudinaryService::class.java))
-        enableSpinner(false)
     }
 
     public override fun onResume() {
@@ -135,7 +134,6 @@ class CreatePostActivity : AppCompatActivity() {
             sendPostAction.putExtra("EXTRA_BUNDLE", bundle)
 
             LocalBroadcastManager.getInstance(this).sendBroadcast(sendPostAction)
-            enableSpinner(true)
             finish()
         } else {
             Toast.makeText(applicationContext, "Choose a image to share.", Toast.LENGTH_SHORT).show()
@@ -235,17 +233,5 @@ class CreatePostActivity : AppCompatActivity() {
             // fetch data after we know the size so we can request the exact size from Cloudinary
             adapter.replaceImages(getData())
         }
-    }
-
-    fun enableSpinner(enable: Boolean) {
-        if (enable) {
-            createSpinner.visibility = View.VISIBLE
-        } else {
-            createSpinner.visibility = View.INVISIBLE
-        }
-
-        contentCreatePost.isEnabled = !enable
-        galleryCreatePost.isEnabled = !enable
-        fabAddGallery.isEnabled = !enable
     }
 }

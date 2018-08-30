@@ -60,10 +60,11 @@
         android:inputType="textMultiLine"
         android:textColor="@color/blue_grey_300"
         android:theme="@style/EditText.Grey"
+        android:hint="@string/post_text_hint"
+        android:textColorHint="@color/blue_grey_300"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/userImageCreatePost"
-        tools:text="What's new?" />
+        app:layout_constraintTop_toBottomOf="@+id/userImageCreatePost" />
 
     <android.support.v7.widget.RecyclerView
         android:id="@+id/galleryCreatePost"
@@ -91,21 +92,5 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:rippleColor="@android:color/white"
         app:srcCompat="@android:drawable/ic_menu_gallery" />
-
-    <ProgressBar
-        android:id="@+id/createSpinner"
-        style="?android:attr/progressBarStyle"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="8dp"
-        android:layout_marginEnd="8dp"
-        android:layout_marginStart="8dp"
-        android:layout_marginTop="8dp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
 
 </android.support.constraint.ConstraintLayout>
