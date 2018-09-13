@@ -51,132 +51,108 @@ class MainActivity : AppCompatActivity() {
     private var postsDataChangedReceiver: BroadcastReceiver? = null
     private var postsSendActionReceiver: BroadcastReceiver? = null
     private var postMoreInfoDialogReceiver: BroadcastReceiver? = null
+    private var userDataChangeReceiver: BroadcastReceiver? = null
 
     private var mBehavior: BottomSheetBehavior<View>? = null
     private var mBottomSheetDialog: BottomSheetDialog? = null
 
     private var mIsRunning: Boolean = false
 
-    private val userDataChangeReceiver = object: BroadcastReceiver() {
+
+    private fun unregisterSocialGroupReceiver() {
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(socialGroupReceiver!!)
+    }
+
+    private fun registerSocialGroupReceiver() {
+        Log.d(TAG, "registerSocialGroupReceiver()")
+        val filter = IntentFilter()
+        filter.addAction(BROADCAST_USER_DATA_CHANGE)
+        filter.addAction(CloudinaryService.ACTION_RESOURCE_MODIFIED)
+        filter.addAction(BROADCAST_SEND_POST_ACTION)
+        filter.addAction(BROADCAST_POST_MORE_INFO_DIALOG)
+        LocalBroadcastManager.getInstance(this).registerReceiver(socialGroupReceiver, filter)
+    }
+
+    private val socialGroupReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent?) {
-            if (App.prefs.isLoggedIn) {
-                userNameNavHeader.text = UserDataServices.name
-                userEmailNavHeader.text = UserDataServices.email
+            val action = intent?.action
+            Log.d(TAG, "ACTION = ${intent?.action} ")
 
-                val resourceId = resources.getIdentifier(UserDataServices.avatarName, "drawable", packageName)
-                userImageNavHeader.setImageResource(resourceId)
+            if (!action.isNullOrEmpty()) {
+                when (action) {
+                    BROADCAST_USER_DATA_CHANGE -> {
+                        Log.d(TAG, "BROADCAST_USER_DATA_CHANGE")
+                        if (App.prefs.isLoggedIn) {
+                            userNameNavHeader.text = UserDataServices.name
+                            userEmailNavHeader.text = UserDataServices.email
 
-                loginBtnNavHeader.text = "Logout"
+                            val resourceId = resources.getIdentifier(UserDataServices.avatarName, "drawable", packageName)
+                            userImageNavHeader.setImageResource(resourceId)
 
-                refreshSocialWallUi()
+                            loginBtnNavHeader.text = "Logout"
 
-//                MessageService.getChannels { complete ->
-//                    if (complete) {
-//                        if (MessageService.channels.count() > 0) {
-//                            selectedChannel = MessageService.channels[0]
-//                            channelAdapter.notifyDataSetChanged()
-//                            updateWithChannel()
-//                        }
-//                    }
-//                }
-            }
-        }
-    }
+                            refreshSocialWallUi()
+                        }
+                    }
 
-    private fun unregisterPostsDataReceiver() {
-        if (postsDataChangedReceiver != null) {
-            LocalBroadcastManager.getInstance(this).unregisterReceiver(postsDataChangedReceiver!!)
-        }
-    }
+                    CloudinaryService.ACTION_RESOURCE_MODIFIED -> {
+                        Log.d(TAG, "CloudinaryService.ACTION_RESOURCE_MODIFIED")
+                        if (!isFinishing) {
+                            if (CloudinaryService.ACTION_RESOURCE_MODIFIED == intent.action) {
+                                val resource = intent.getSerializableExtra("resource") as Resource
 
-    private fun registerPostsDataReceiver() {
-        val filter = IntentFilter(CloudinaryService.ACTION_RESOURCE_MODIFIED)
-        filter.addAction(CloudinaryService.ACTION_UPLOAD_PROGRESS)
-        postsDataChangedReceiver = object : BroadcastReceiver() {
-            override fun onReceive(context: Context, intent: Intent) {
-                if (!isFinishing) {
-                    if (CloudinaryService.ACTION_RESOURCE_MODIFIED == intent.action) {
-                        val resource = intent.getSerializableExtra("resource") as Resource
-
-                        if (!resource.cloudinaryPublicId.isNullOrEmpty()) {
-                            PostService.createPost(UserDataServices.email, UserDataServices.name,
-                                    UserDataServices.avatarName, resource.cloudinaryPublicId!!,
-                                    App.prefs.postContent) { createSuccess ->
-                                if (createSuccess) {
-                                    refreshSocialWallUi()
-                                } else {
-                                    errorToast()
+                                if (!resource.cloudinaryPublicId.isNullOrEmpty()) {
+                                    PostService.createPost(UserDataServices.email, UserDataServices.name,
+                                            UserDataServices.avatarName, resource.cloudinaryPublicId!!,
+                                            App.prefs.postContent) { createSuccess ->
+                                        if (createSuccess) {
+                                            refreshSocialWallUi()
+                                        } else {
+                                            errorToast()
+                                        }
+                                    }
                                 }
                             }
                         }
                     }
+
+                    BROADCAST_SEND_POST_ACTION -> {
+                        Log.d(TAG, "BROADCAST_SEND_POST_ACTION")
+                        enableSpinner(true)
+
+                        val bundle: Bundle?
+                        var uri: Uri? = null
+                        var clip: ClipData? = null
+                        var flags = 0
+
+                        try {
+                            bundle = intent.getBundleExtra("EXTRA_BUNDLE")
+                            uri = bundle.getParcelable<Uri>("EXTRA_URI")
+                            clip = bundle.getParcelable<ClipData>("EXTRA_CLIP")
+                            flags = bundle.getInt("EXTRA_FLAGS")
+                        } catch (e: Exception) {
+                            e.printStackTrace()
+                        }
+
+                        uploadDataToCloudinary(uri, clip, flags)
+                    }
+
+                    BROADCAST_POST_MORE_INFO_DIALOG -> {
+                        Log.d(TAG, "BROADCAST_POST_MORE_INFO_DIALOG")
+                        val bundle: Bundle?
+                        var postId: String? = ""
+                        try {
+                            bundle = intent.getBundleExtra("EXTRA_BUNDLE")
+                            postId = bundle?.getString("EXTRA_POST_ID")
+                        } catch (e: Exception) {
+                            e.printStackTrace()
+                        }
+                        if (!postId.isNullOrEmpty()) {
+                            showBottomSheetDialog(postId!!)
+                        }
+                    }
                 }
             }
-        }
-        if (postsDataChangedReceiver != null) {
-            LocalBroadcastManager.getInstance(this).registerReceiver(postsDataChangedReceiver!!, filter)
-        }
-    }
-
-    private fun unregisterSendActionReceiver() {
-        if (postsSendActionReceiver != null) {
-            LocalBroadcastManager.getInstance(this).unregisterReceiver(postsSendActionReceiver!!)
-        }
-    }
-
-    private fun registerPostsSendActionReceiver() {
-        val filter = IntentFilter(BROADCAST_SEND_POST_ACTION)
-        postsSendActionReceiver = object : BroadcastReceiver() {
-            override fun onReceive(context: Context, intent: Intent) {
-                enableSpinner(true)
-
-                val bundle: Bundle?
-                var uri: Uri? = null
-                var clip: ClipData? = null
-                var flags = 0
-
-                try {
-                    bundle = intent.getBundleExtra("EXTRA_BUNDLE")
-                    uri = bundle.getParcelable<Uri>("EXTRA_URI")
-                    clip = bundle.getParcelable<ClipData>("EXTRA_CLIP")
-                    flags = bundle.getInt("EXTRA_FLAGS")
-                } catch (e: Exception) {
-                    e.printStackTrace()
-                }
-
-                uploadDataToCloudinary(uri, clip, flags)
-            }
-        }
-        if (postsSendActionReceiver != null) {
-            LocalBroadcastManager.getInstance(this).registerReceiver(postsSendActionReceiver!!, filter)
-        }
-    }
-
-    private fun unregisterMoreInfoDialogReceiver() {
-        if (postMoreInfoDialogReceiver != null) {
-            LocalBroadcastManager.getInstance(this).unregisterReceiver(postMoreInfoDialogReceiver!!)
-        }
-    }
-
-    private fun registerPostMoreInfoDialogReceiver() {
-        val filter = IntentFilter(BROADCAST_POST_MORE_INFO_DIALOG)
-        postMoreInfoDialogReceiver = object : BroadcastReceiver() {
-            override fun onReceive(context: Context?, intent: Intent?) {
-                val bundle: Bundle?
-                var postId: String? = ""
-                try {
-                    bundle = intent?.getBundleExtra("EXTRA_BUNDLE")
-                    postId = bundle?.getString("EXTRA_POST_ID")
-                } catch (e: Exception) {
-                    e.printStackTrace()
-                }
-                if (!postId.isNullOrEmpty()) {
-                    showBottomSheetDialog(postId!!)
-                }
-            }
-        }
-        if (postMoreInfoDialogReceiver != null) {
-            LocalBroadcastManager.getInstance(this).registerReceiver(postMoreInfoDialogReceiver!!, filter)
         }
     }
 
@@ -208,12 +184,8 @@ class MainActivity : AppCompatActivity() {
         mIsRunning = true
 
         parent_view = findViewById<View>(android.R.id.content)
-        LocalBroadcastManager.getInstance(this).registerReceiver(userDataChangeReceiver,
-                IntentFilter(BROADCAST_USER_DATA_CHANGE))
 
-        registerPostsSendActionReceiver()
-        registerPostsDataReceiver()
-        registerPostMoreInfoDialogReceiver()
+        registerSocialGroupReceiver()
 
         val handlerThread = HandlerThread("MainActivityWorker")
         handlerThread.start()
@@ -235,9 +207,7 @@ class MainActivity : AppCompatActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
-        unregisterPostsDataReceiver()
-        unregisterSendActionReceiver()
-        unregisterMoreInfoDialogReceiver()
+        unregisterSocialGroupReceiver()
     }
 
     private fun initToolbar() {
