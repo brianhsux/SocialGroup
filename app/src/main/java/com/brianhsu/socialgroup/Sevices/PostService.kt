@@ -14,6 +14,7 @@ import org.json.JSONObject
 object PostService {
 
     val posts = ArrayList<Post>()
+    var editPost: Post = Post("", "", "",  "photo_male_1", "bcnkrwniruyzworepuuf", "default string", "Aug 20, 2018 18:20:20")
 
     fun createPost(authorEmail: String, authorName: String, authorImage: String, postImage: String,
                    postContent: String, complete: (Boolean) -> Unit) {
@@ -97,9 +98,51 @@ object PostService {
         posts.clear()
     }
 
-    fun deletePostById(postId: String?, complete: (Boolean) -> Unit) {
+    fun getPostById(postId: String, complete: (Boolean) -> Unit) {
 
-        val requestUrl = "${App.prefs.URL_DELETE_POST}/$postId"
+        val requestUrl = "${App.prefs.URL_GET_POST}$postId"
+        Log.d(TAG, "getPostById: $postId, requestUrl: $requestUrl")
+        val getRequest = object : JsonObjectRequest(Method.GET, requestUrl, null , Response.Listener { response ->
+
+            try {
+                Log.d(TAG, "getPostById: $response")
+
+//                val postId = response.getString("_id")
+                val authorEmail = response.getString("authorEmail")
+                val authorName = response.getString("authorName")
+                val authorImageId = response.getString("authorImage")
+                val postImageId = response.getString("postImage")
+                val postContent = response.getString("postContent")
+                val postTime = response.getString("date")
+
+                editPost = Post(postId, authorEmail, authorName, authorImageId, postImageId, postContent, postTime)
+                complete(true)
+            } catch (e: JSONException) {
+                Log.d(TAG, "EXC: " + e.localizedMessage)
+                complete(false)
+            }
+
+        }, Response.ErrorListener { error ->
+            Log.d(TAG, "Could not get post $error")
+            complete(false)
+        }) {
+            override fun getBodyContentType(): String {
+                return "application/json; charset=utf-8"
+            }
+
+            override fun getHeaders(): MutableMap<String, String> {
+                val headers = HashMap<String, String>()
+                headers.put("Authorization", "Bearer ${App.prefs.authToken}")
+                return headers
+            }
+        }
+
+        App.prefs.requestQueue.add(getRequest)
+    }
+
+    fun deletePostById(postId: String, complete: (Boolean) -> Unit) {
+
+        val requestUrl = "${App.prefs.URL_DELETE_POST}$postId"
         Log.d(TAG, "PostService>>>deletePost()-1, postId: $postId, requestUrl: $requestUrl")
 
         val deleteRequest = object : JsonObjectRequest(Method.DELETE, requestUrl, null, Response.Listener { response ->

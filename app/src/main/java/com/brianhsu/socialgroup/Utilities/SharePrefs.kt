@@ -60,5 +60,6 @@ class SharePrefs(context: Context) {
 
     val URL_CREATE_POST = "${baseUrl}post/add"
     val URL_READ_POST = "${baseUrl}post"
-    val URL_DELETE_POST = "${baseUrl}post"
+    val URL_GET_POST = "${baseUrl}post/byId/"
+    val URL_DELETE_POST = "${baseUrl}post/"
 }

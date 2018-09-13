@@ -170,7 +170,9 @@ class MainActivity : AppCompatActivity() {
                 } catch (e: Exception) {
                     e.printStackTrace()
                 }
-                showBottomSheetDialog(postId)
+                if (!postId.isNullOrEmpty()) {
+                    showBottomSheetDialog(postId!!)
+                }
             }
         }
         if (postMoreInfoDialogReceiver != null) {
@@ -446,7 +448,7 @@ class MainActivity : AppCompatActivity() {
         ResourceRepo.instance?.uploadResource(resource)
     }
 
-    private fun showBottomSheetDialog(postId: String?) {
+    private fun showBottomSheetDialog(postId: String) {
         if (mBehavior?.state == BottomSheetBehavior.STATE_EXPANDED) {
             mBehavior?.state = BottomSheetBehavior.STATE_COLLAPSED
         }
@@ -454,14 +456,24 @@ class MainActivity : AppCompatActivity() {
         val view = layoutInflater.inflate(R.layout.sheet_list, null)
 
         (view.findViewById(R.id.lyt_edit_post) as View).setOnClickListener {
-            Toast.makeText(applicationContext, "Edit Post $postId", Toast.LENGTH_SHORT).show()
+//            Toast.makeText(applicationContext, "Edit Post $postId", Toast.LENGTH_SHORT).show()
+            mBottomSheetDialog?.dismiss()
+            PostService.getPostById(postId) { getSuccess ->
+                if (getSuccess) {
+                    Toast.makeText(applicationContext, "Get Post $postId Success.", Toast.LENGTH_SHORT).show()
+                    val editPostIntent = Intent(this, EditPostActivity::class.java)
+                    startActivity(editPostIntent)
+                } else {
+                    errorToast()
+                }
+            }
         }
 
         (view.findViewById(R.id.lyt_delete_post) as View).setOnClickListener {
             Toast.makeText(applicationContext, "Delete Post $postId", Toast.LENGTH_SHORT).show()
             mBottomSheetDialog?.dismiss()
-            PostService.deletePostById(postId) { createSuccess ->
-                if (createSuccess) {
+            PostService.deletePostById(postId) { deleteSuccess ->
+                if (deleteSuccess) {
                     refreshSocialWallUi()
                 } else {
                     errorToast()

@@ -2,8 +2,8 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
     <item
-        android:id="@+id/action_send_post"
+        android:id="@+id/action_edit_post"
         android:orderInCategory="100"
-        android:title="@string/send_post"
+        android:title="@string/edit_post"
         app:showAsAction="always" />
 </menu>

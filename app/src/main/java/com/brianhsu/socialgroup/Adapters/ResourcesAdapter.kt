@@ -13,10 +13,12 @@ import android.widget.ProgressBar
 import android.widget.TextView
 import com.brianhsu.socialgroup.R
 import com.brianhsu.socialgroup.Utilities.TAG
+import com.brianhsu.socialgroup.Utilities.Tools
 import com.brianhsu.socialgroup.model.Resource
 
 import com.cloudinary.android.MediaManager
 import com.cloudinary.android.ResponsiveUrl
+import com.cloudinary.Transformation
 import com.squareup.picasso.Picasso
 
 import java.util.ArrayList
@@ -36,8 +38,10 @@ internal class ResourcesAdapter(val context: Context, resources: List<Resource>,
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
         return if (viewType == TYPE_REGULAR) {
+            Log.d(TAG, "onCreateViewHolder()-1")
             createRegularViewHolder(parent)
         } else {
+            Log.d(TAG, "onCreateViewHolder()-2")
             createFailedViewHolder(parent)
         }
     }
@@ -154,114 +158,27 @@ internal class ResourcesAdapter(val context: Context, resources: List<Resource>,
 
         val isVideo = resource.resourceType.equals("video")
 
-        Log.d(TAG, "ResourcesAdapter>>>bindRegularView()-2-1, resource.localUri: " + resource.localUri)
+        Log.d(TAG, "ResourcesAdapter>>>bindRegularView()-2-1, resource.localUri: ${resource.localUri}")
+        Log.d(TAG, "ResourcesAdapter>>>bindRegularView()-2-2, resource.cloudinaryPublicId: ${resource.cloudinaryPublicId}")
         holder.blackOverlay.animate().cancel()
         holder.blackOverlay.visibility = View.GONE
 
         // TODO: will complete delete the preview image
 //        holder.cancelRequest.visibility = View.VISIBLE
 
-
         val placeholder = if (resource.resourceType.equals("image")) R.drawable.placeholder else R.drawable.video_placeholder
 
-        Log.d(TAG, "ResourcesAdapter>>>bindRegularView()-3, local is true: ")
-        Picasso.get().load(resource.localUri).placeholder(placeholder).centerCrop().resize(requiredSize, requiredSize).into(holder.imageView)
+        if (resource.localUri != null) {
+            Log.d(TAG, "ResourcesAdapter>>>bindRegularView()-3, show image local")
+            Picasso.get().load(resource.localUri).placeholder(placeholder).centerCrop().resize(requiredSize, requiredSize).into(holder.imageView)
+        } else {
+            Log.d(TAG, "ResourcesAdapter>>>bindRegularView()-3, show image on cloudinary")
+            val transformation: Transformation<*> = MediaManager.get().url().transformation().width(250).height(250).gravity("faces").crop("fill")
+            val postImageUrl:String = MediaManager.get().url().transformation(transformation).generate("${resource.cloudinaryPublicId}.webp")
+            Tools.displayImageOriginal(context, holder.imageView, postImageUrl)
+        }
 
     }
-
-//    private fun bindRegularView(holder: ResourceViewHolder, position: Int) {
-//        Log.d(TAG, "ResourcesAdapter>>>bindRegularView()-1, position: " + position)
-//        val resourceWithMeta = resources[position]
-//        val resource = resourceWithMeta.resource
-//
-//        // setup default values for more readable code:
-//        holder.itemView.tag = resource
-//        holder.deleteButton.tag = resource
-//        holder.cancelRequest.tag = resource
-//        holder.deleteButton.visibility = View.VISIBLE
-//        holder.progressBar.progress = 0
-//        holder.progressBar.visibility = View.INVISIBLE
-//        holder.buttonsContainer.visibility = View.GONE
-//        holder.cancelRequest.visibility = View.GONE
-//        holder.statusText.text = null
-//        holder.name.text = null
-//        var local = true
-//        val isVideo = resource.resourceType.equals("video")
-//        Log.d(TAG, "ResourcesAdapter>>>bindRegularView()-2, resource.status: " + resource.status)
-//        when (resource.status) {
-//
-//            Resource.UploadStatus.QUEUED -> {
-//                holder.blackOverlay.animate().cancel()
-//                holder.blackOverlay.visibility = View.GONE
-//                holder.cancelRequest.visibility = View.VISIBLE
-//            }
-//            Resource.UploadStatus.UPLOADING -> {
-//                holder.cancelRequest.visibility = View.VISIBLE
-//                val progressFraction = resourceWithMeta.bytes.toDouble() / resourceWithMeta.totalBytes
-//                val progress = Math.round(progressFraction * 1000).toInt()
-//                holder.progressBar.visibility = View.VISIBLE
-//                holder.progressBar.max = 1000
-//                holder.progressBar.progress = progress
-//                if (holder.blackOverlay.visibility != View.VISIBLE) {
-//                    holder.blackOverlay.alpha = 0f
-//                    holder.blackOverlay.visibility = View.VISIBLE
-//                    holder.blackOverlay.animate().alpha(1f)
-//                }
-//                if (isVideo) {
-//                    holder.name.setText(resource.name)
-//                }
-//                setProgressText(progressFraction, holder.statusText)
-//            }
-//            Resource.UploadStatus.UPLOADED -> {
-//                holder.blackOverlay.animate().cancel()
-//                holder.blackOverlay.visibility = View.GONE
-//                holder.videoIcon.visibility = if (isVideo) View.VISIBLE else View.GONE
-//                holder.buttonsContainer.visibility = View.VISIBLE
-//                local = false
-//            }
-//            Resource.UploadStatus.RESCHEDULED -> {
-//                holder.blackOverlay.animate().cancel()
-//                holder.blackOverlay.visibility = View.GONE
-//            }
-//            Resource.UploadStatus.FAILED -> {
-//                holder.blackOverlay.animate().cancel()
-//                holder.blackOverlay.visibility = View.GONE
-//            }
-//
-//            else -> {
-//                Log.d(TAG, "ResourcesAdapter>>>bindRegularView()-2-1, resource.localUri: " + resource.localUri)
-//                holder.blackOverlay.animate().cancel()
-//                holder.blackOverlay.visibility = View.GONE
-//                holder.cancelRequest.visibility = View.VISIBLE
-//            }
-//        }
-//
-//        val placeholder = if (resource.resourceType.equals("image")) R.drawable.placeholder else R.drawable.video_placeholder
-//
-//        if (local) {
-//            Log.d(TAG, "ResourcesAdapter>>>bindRegularView()-3, local is true: ")
-//            Picasso.get().load(resource.localUri).placeholder(placeholder).centerCrop().resize(requiredSize, requiredSize).into(holder.imageView)
-//        } else {
-//            Log.d(TAG, "ResourcesAdapter>>>bindRegularView()-3, local is false: ")
-//            val publicId = resource.cloudinaryPublicId
-//            val url = MediaManager.get().url().publicId(publicId).resourceType(resource.resourceType).format("webp")
-//            MediaManager.get().responsiveUrl(ResponsiveUrl.Preset.AUTO_FILL)
-//                    .generate(url, holder.imageView) {
-//                        url -> Picasso.get().load(url.generate()).placeholder(placeholder).into(holder.imageView)
-//                    }
-//        }
-//
-//        if (resourceWithMeta.totalBytes > 0) {
-//            val progressFraction = resourceWithMeta.bytes.toDouble() / resourceWithMeta.totalBytes
-//            val progress = Math.round(progressFraction * 1000).toInt()
-//            holder.progressBar.visibility = View.VISIBLE
-//            holder.progressBar.max = 1000
-//            holder.progressBar.progress = progress
-//        } else {
-//            holder.progressBar.progress = 0
-//            holder.progressBar.visibility = View.INVISIBLE
-//        }
-//    }
 
     private fun setProgressText(progressFraction: Double, statusText: TextView) {
         val progressStr = Math.round(progressFraction * 100).toString()
@@ -306,6 +223,12 @@ internal class ResourcesAdapter(val context: Context, resources: List<Resource>,
                 updated.localUri)
 
         addResource(updated)
+    }
+
+    fun resourceUrlUpdated(imageUrl: String) {
+        Log.d(TAG, "resourceUrlUpdated()-1")
+        notifyItemInserted(0)
+//        Tools.displayImageOriginal(context, imageView, imageUrl)
     }
 
     fun resourceUpdated(updated: Resource) {

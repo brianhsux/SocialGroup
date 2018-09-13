@@ -32,6 +32,7 @@
         <activity android:name=".controller.LoginActivity" />
         <activity android:name=".controller.CreateUserActivity" />
         <activity android:name=".controller.CreatePostActivity" />
+        <activity android:name=".controller.EditPostActivity" />
         <activity android:name=".controller.SettingSectioned" />
         <activity
             android:name=".controller.ImageActivity"
