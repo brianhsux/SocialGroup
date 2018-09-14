@@ -15,6 +15,7 @@ import android.support.v7.widget.RecyclerView
 import android.support.v7.widget.SimpleItemAnimator
 import android.text.Editable
 import android.text.SpannableStringBuilder
+import android.text.TextUtils
 import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
@@ -43,6 +44,7 @@ class EditPostActivity : AppCompatActivity(){
     private var dividerSize: Int = 0
     private val statuses = listOf(Resource.UploadStatus.QUEUED)
     private var selectData: Intent? = null
+    private var shouldHandleEditPostImage: Boolean = true
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -62,12 +64,9 @@ class EditPostActivity : AppCompatActivity(){
 
         val editable: Editable = SpannableStringBuilder(PostService.editPost.postContent)
         contentEditPost.text = editable
-        handleEditPostImage()
-
-//        val transformation: Transformation<*> = MediaManager.get().url().transformation().width(250).height(250).gravity("faces").crop("fill")
-//        val postImageUrl:String = MediaManager.get().url().transformation(transformation).generate("${PostService.editPost.postImageId}.webp")
-//        Log.d(TAG, "onResume()>>>postImageUrl: $postImageUrl")
-//        resourceUrlUpdated(postImageUrl)
+        if (shouldHandleEditPostImage) {
+            handleEditPostImage()
+        }
 
         if (recyclerView != null) {
             if (recyclerView!!.width > 0) {
@@ -86,7 +85,9 @@ class EditPostActivity : AppCompatActivity(){
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
+
         if (resultCode == Activity.RESULT_OK) {
+            shouldHandleEditPostImage = false
             if (requestCode == CHOOSE_IMAGE_REQUEST_CODE && data != null) {
                 uploadImageFromIntentUri(data)
                 selectData = data
@@ -144,10 +145,20 @@ class EditPostActivity : AppCompatActivity(){
 
         if (selectData != null) {
             val editPostAction = Intent(BROADCAST_EDIT_POST_ACTION)
+            editPostAction.putExtra("CONTENT", BROADCAST_EDIT_POST_LOCAL_IMAGE_CONTENT)
             val bundle = Bundle()
             bundle.putParcelable("EXTRA_URI", selectData?.data)
             bundle.putParcelable("EXTRA_CLIP", selectData?.clipData)
             bundle.putInt("EXTRA_FLAGS", selectData!!.flags)
+            editPostAction.putExtra("EXTRA_BUNDLE", bundle)
+
+            LocalBroadcastManager.getInstance(this).sendBroadcast(editPostAction)
+            finish()
+        } else if (!TextUtils.isEmpty(PostService.editPost.postImageId)) {
+            val editPostAction = Intent(BROADCAST_EDIT_POST_ACTION)
+            editPostAction.putExtra("CONTENT", BROADCAST_EDIT_POST_REMOTE_IMAGE_CONTENT)
+            val bundle = Bundle()
+            bundle.putString("EXTRA_POST_IMAGE_ID", PostService.editPost.postImageId)
             editPostAction.putExtra("EXTRA_BUNDLE", bundle)
 
             LocalBroadcastManager.getInstance(this).sendBroadcast(editPostAction)
@@ -170,19 +181,8 @@ class EditPostActivity : AppCompatActivity(){
         runOnUiThread {
             val adapter = recyclerView?.adapter as ResourcesAdapter
             if (resource != null) {
-                adapter.resourceTempUpdated(resource)
+                adapter.replaceImage(resource)
             }
-        }
-    }
-
-    private fun resourceUrlUpdated(imageUrl: String) {
-        Log.d(TAG, "resourceUrlUpdated()-1")
-        runOnUiThread {
-            Log.d(TAG, "resourceUrlUpdated()>>>runOnUiThread()-1")
-            val adapter = recyclerView?.adapter as? ResourcesAdapter
-            Log.d(TAG, "resourceUrlUpdated()>>>runOnUiThread()-2")
-            adapter?.resourceUrlUpdated(imageUrl)
-            Log.d(TAG, "resourceUrlUpdated()>>>runOnUiThread()-3")
         }
     }
 

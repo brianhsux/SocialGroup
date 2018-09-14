@@ -17,11 +17,14 @@ import com.brianhsu.socialgroup.Utilities.Tools
 import com.brianhsu.socialgroup.model.Resource
 
 import com.cloudinary.android.MediaManager
-import com.cloudinary.android.ResponsiveUrl
 import com.cloudinary.Transformation
+import com.rohitarya.picasso.facedetection.transformation.core.PicassoFaceDetector
 import com.squareup.picasso.Picasso
 
 import java.util.ArrayList
+import com.rohitarya.picasso.facedetection.transformation.FaceCenterCrop
+
+
 
 internal class ResourcesAdapter(val context: Context, resources: List<Resource>, val requiredSize: Int, val validStatuses: List<Resource.UploadStatus>, val listener: ImageClickedListener?) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
     private val resources: MutableList<ResourceWithMeta>
@@ -37,21 +40,19 @@ internal class ResourcesAdapter(val context: Context, resources: List<Resource>,
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
+        PicassoFaceDetector.initialize(context)
+
         return if (viewType == TYPE_REGULAR) {
-            Log.d(TAG, "onCreateViewHolder()-1")
             createRegularViewHolder(parent)
         } else {
-            Log.d(TAG, "onCreateViewHolder()-2")
             createFailedViewHolder(parent)
         }
     }
 
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
         if (getItemViewType(position) == TYPE_REGULAR) {
-            Log.d(TAG, "ResourcesAdapter>>>onBindViewHolder()-1")
             bindRegularView(holder as ResourceViewHolder, position)
         } else {
-            Log.d(TAG, "ResourcesAdapter>>>onBindViewHolder()-2")
             bindErrorView(holder as FailedResourceViewHolder, position)
         }
     }
@@ -140,7 +141,6 @@ internal class ResourcesAdapter(val context: Context, resources: List<Resource>,
     }
 
     private fun bindRegularView(holder: ResourceViewHolder, position: Int) {
-        Log.d(TAG, "ResourcesAdapter>>>bindRegularView()-1, position: " + position)
         val resourceWithMeta = resources[position]
         val resource = resourceWithMeta.resource
 
@@ -158,19 +158,21 @@ internal class ResourcesAdapter(val context: Context, resources: List<Resource>,
 
         val isVideo = resource.resourceType.equals("video")
 
-        Log.d(TAG, "ResourcesAdapter>>>bindRegularView()-2-1, resource.localUri: ${resource.localUri}")
-        Log.d(TAG, "ResourcesAdapter>>>bindRegularView()-2-2, resource.cloudinaryPublicId: ${resource.cloudinaryPublicId}")
         holder.blackOverlay.animate().cancel()
         holder.blackOverlay.visibility = View.GONE
 
         // TODO: will complete delete the preview image
 //        holder.cancelRequest.visibility = View.VISIBLE
 
-        val placeholder = if (resource.resourceType.equals("image")) R.drawable.placeholder else R.drawable.video_placeholder
-
         if (resource.localUri != null) {
             Log.d(TAG, "ResourcesAdapter>>>bindRegularView()-3, show image local")
-            Picasso.get().load(resource.localUri).placeholder(placeholder).centerCrop().resize(requiredSize, requiredSize).into(holder.imageView)
+            val placeholder = if (resource.resourceType.equals("image")) R.drawable.placeholder else R.drawable.video_placeholder
+            Picasso.get().load(resource.localUri)
+                    .fit() // use fit() and centerInside() for making it memory efficient.
+                    .centerInside()
+                    .placeholder(placeholder)
+                    .transform(FaceCenterCrop(requiredSize, requiredSize)) //in pixels. You can also use FaceCenterCrop(width, height, unit) to provide width, height in DP.
+                    .into(holder.imageView)
         } else {
             Log.d(TAG, "ResourcesAdapter>>>bindRegularView()-3, show image on cloudinary")
             val transformation: Transformation<*> = MediaManager.get().url().transformation().width(250).height(250).gravity("faces").crop("fill")
@@ -193,8 +195,16 @@ internal class ResourcesAdapter(val context: Context, resources: List<Resource>,
         notifyItemInserted(0)
     }
 
+    fun replaceImage(resource: Resource) {
+        this.resources.clear()
+        this.resources.add(0, ResourceWithMeta(resource))
+
+        notifyDataSetChanged()
+    }
+
     fun replaceImages(resources: List<Resource>) {
         this.resources.clear()
+        // TODO: Current only could upload one picture a time
         for (resource in resources) {
             this.resources.add(ResourceWithMeta(resource))
         }
@@ -221,61 +231,54 @@ internal class ResourcesAdapter(val context: Context, resources: List<Resource>,
         Log.d(TAG, "ResourcesAdapter>>>resourceTempUpdated()-1, updated.status: " + updated.status
                 + ", validStatuses: " + validStatuses + ", name: " + updated.name + ", localUri: " +
                 updated.localUri)
-
         addResource(updated)
     }
 
-    fun resourceUrlUpdated(imageUrl: String) {
-        Log.d(TAG, "resourceUrlUpdated()-1")
-        notifyItemInserted(0)
-//        Tools.displayImageOriginal(context, imageView, imageUrl)
-    }
-
-    fun resourceUpdated(updated: Resource) {
-        Log.d(TAG, "ResourcesAdapter>>>resourceUpdated()-1, updated.status: " + updated.status
-        + ", validStatuses: " + validStatuses)
-        if (!validStatuses.contains(updated.status)) {
-            Log.d(TAG, "ResourcesAdapter>>>resourceUpdated()-2")
-            removeResource(updated.localUri)
-        } else {
-            Log.d(TAG, "ResourcesAdapter>>>resourceUpdated()-3")
-            var found = false
-            for (i in resources.indices) {
-                Log.d(TAG, "ResourcesAdapter>>>resourceUpdated()-4")
-                val resourceWithMeta = resources[i]
-                val resource = resourceWithMeta.resource
-                if (resource.requestId.equals(updated.requestId)) {
-                    Log.d(TAG, "ResourcesAdapter>>>resourceUpdated()-5")
-                    Resource.copyFields(updated, resource)
-                    resourceWithMeta.bytes = 0
-                    resourceWithMeta.totalBytes = 0
-                    notifyItemChanged(i)
-                    found = true
-                    break
-                }
-            }
-
-            if (!found) {
-                Log.d(TAG, "ResourcesAdapter>>>resourceUpdated()-6")
-                // not found but status is valid - it should be added here.
-                addResource(updated)
-            }
-        }
-    }
-
-    fun progressUpdated(requestId: String, bytes: Long, totalBytes: Long) {
-        Log.d(TAG, "ResourcesAdapter>>>progressUpdated()-1, requestId: " + requestId +
-        ", bytes: " + bytes + ", totalBytes: " + totalBytes)
-        for (i in resources.indices) {
-            val resource = resources[i]
-            if (resource.resource.requestId.equals(requestId)) {
-                resource.bytes = bytes
-                resource.totalBytes = totalBytes
-                notifyItemChanged(i)
-                break
-            }
-        }
-    }
+//    fun resourceUpdated(updated: Resource) {
+//        Log.d(TAG, "ResourcesAdapter>>>resourceUpdated()-1, updated.status: " + updated.status
+//        + ", validStatuses: " + validStatuses)
+//        if (!validStatuses.contains(updated.status)) {
+//            Log.d(TAG, "ResourcesAdapter>>>resourceUpdated()-2")
+//            removeResource(updated.localUri)
+//        } else {
+//            Log.d(TAG, "ResourcesAdapter>>>resourceUpdated()-3")
+//            var found = false
+//            for (i in resources.indices) {
+//                Log.d(TAG, "ResourcesAdapter>>>resourceUpdated()-4")
+//                val resourceWithMeta = resources[i]
+//                val resource = resourceWithMeta.resource
+//                if (resource.requestId.equals(updated.requestId)) {
+//                    Log.d(TAG, "ResourcesAdapter>>>resourceUpdated()-5")
+//                    Resource.copyFields(updated, resource)
+//                    resourceWithMeta.bytes = 0
+//                    resourceWithMeta.totalBytes = 0
+//                    notifyItemChanged(i)
+//                    found = true
+//                    break
+//                }
+//            }
+//
+//            if (!found) {
+//                Log.d(TAG, "ResourcesAdapter>>>resourceUpdated()-6")
+//                // not found but status is valid - it should be added here.
+//                addResource(updated)
+//            }
+//        }
+//    }
+//
+//    fun progressUpdated(requestId: String, bytes: Long, totalBytes: Long) {
+//        Log.d(TAG, "ResourcesAdapter>>>progressUpdated()-1, requestId: " + requestId +
+//        ", bytes: " + bytes + ", totalBytes: " + totalBytes)
+//        for (i in resources.indices) {
+//            val resource = resources[i]
+//            if (resource.resource.requestId.equals(requestId)) {
+//                resource.bytes = bytes
+//                resource.totalBytes = totalBytes
+//                notifyItemChanged(i)
+//                break
+//            }
+//        }
+//    }
 
     internal interface ImageClickedListener {
         fun onImageClicked(resource: Resource)

@@ -18,6 +18,7 @@ object PostService {
 
     fun createPost(authorEmail: String, authorName: String, authorImage: String, postImage: String,
                    postContent: String, complete: (Boolean) -> Unit) {
+
         val jsonBody = JSONObject()
 
         jsonBody.put("authorEmail", authorEmail)
@@ -55,6 +56,49 @@ object PostService {
         }
 
         App.prefs.requestQueue.add(createRequest)
+    }
+
+    fun editPost(postId: String, authorEmail: String, authorName: String, authorImage: String, postImage: String,
+                   postContent: String, complete: (Boolean) -> Unit) {
+        val requestUrl = "${App.prefs.URL_EDIT_POST}$postId"
+
+        val jsonBody = JSONObject()
+
+        jsonBody.put("authorEmail", authorEmail)
+        jsonBody.put("authorName", authorName)
+        jsonBody.put("authorImage", authorImage)
+        jsonBody.put("postImage", postImage)
+        jsonBody.put("postContent", postContent)
+        val requestBody = jsonBody.toString()
+
+        val editRequest = object : JsonObjectRequest(Method.PUT, requestUrl, null, Response.Listener { response ->
+
+            try {
+                complete(true)
+            } catch (e: JSONException) {
+                Log.d(TAG, "EXC: " + e.localizedMessage)
+                complete(false)
+            }
+        }, Response.ErrorListener { error ->
+            Log.d(TAG, "Could not add post $error")
+            complete(false)
+        }) {
+            override fun getBodyContentType(): String {
+                return "application/json; charset=utf-8"
+            }
+
+            override fun getBody(): ByteArray {
+                return requestBody.toByteArray()
+            }
+
+            override fun getHeaders(): MutableMap<String, String> {
+                val headers = HashMap<String, String>()
+                headers.put("Authorization", "Bearer ${App.prefs.authToken}")
+                return headers
+            }
+        }
+
+        App.prefs.requestQueue.add(editRequest)
     }
 
     fun readAllPosts(context: Context, complete: (Boolean) -> Unit) {

@@ -69,6 +69,7 @@ class MainActivity : AppCompatActivity() {
         filter.addAction(BROADCAST_USER_DATA_CHANGE)
         filter.addAction(CloudinaryService.ACTION_RESOURCE_MODIFIED)
         filter.addAction(BROADCAST_SEND_POST_ACTION)
+        filter.addAction(BROADCAST_EDIT_POST_ACTION)
         filter.addAction(BROADCAST_POST_MORE_INFO_DIALOG)
         LocalBroadcastManager.getInstance(this).registerReceiver(socialGroupReceiver, filter)
     }
@@ -101,14 +102,27 @@ class MainActivity : AppCompatActivity() {
                             if (CloudinaryService.ACTION_RESOURCE_MODIFIED == intent.action) {
                                 val resource = intent.getSerializableExtra("resource") as Resource
 
+                                // TODO: How can we know this time should new post or edit post?
                                 if (!resource.cloudinaryPublicId.isNullOrEmpty()) {
-                                    PostService.createPost(UserDataServices.email, UserDataServices.name,
-                                            UserDataServices.avatarName, resource.cloudinaryPublicId!!,
-                                            App.prefs.postContent) { createSuccess ->
-                                        if (createSuccess) {
-                                            refreshSocialWallUi()
-                                        } else {
-                                            errorToast()
+                                    if (PostService.editPost.postId == "") {
+                                        PostService.createPost(UserDataServices.email, UserDataServices.name,
+                                                UserDataServices.avatarName, resource.cloudinaryPublicId!!,
+                                                App.prefs.postContent) { createSuccess ->
+                                            if (createSuccess) {
+                                                refreshSocialWallUi()
+                                            } else {
+                                                errorToast()
+                                            }
+                                        }
+                                    } else {
+                                        PostService.editPost(PostService.editPost.postId, UserDataServices.email,
+                                                UserDataServices.name, UserDataServices.avatarName,
+                                                resource.cloudinaryPublicId!!, App.prefs.postContent) { createSuccess ->
+                                            if (createSuccess) {
+                                                refreshSocialWallUi()
+                                            } else {
+                                                errorToast()
+                                            }
                                         }
                                     }
                                 }
@@ -135,6 +149,52 @@ class MainActivity : AppCompatActivity() {
                         }
 
                         uploadDataToCloudinary(uri, clip, flags)
+                    }
+
+                    BROADCAST_EDIT_POST_ACTION -> {
+                        Log.d(TAG, "BROADCAST_EDIT_POST_ACTION")
+                        enableSpinner(true)
+
+                        val content = intent.getStringExtra("CONTENT")
+                        val bundle = intent.getBundleExtra("EXTRA_BUNDLE")
+                        val postImageId = bundle.getString("EXTRA_POST_IMAGE_ID")
+                        var uri: Uri? = null
+                        var clip: ClipData? = null
+                        var flags = 0
+
+                        try {
+                            uri = bundle.getParcelable<Uri>("EXTRA_URI")
+                            clip = bundle.getParcelable<ClipData>("EXTRA_CLIP")
+                            flags = bundle.getInt("EXTRA_FLAGS")
+                        } catch (e: Exception) {
+                            e.printStackTrace()
+                        }
+
+                        Log.d(TAG, "BROADCAST_EDIT_POST_ACTION, content: $content, postImageId: $postImageId")
+
+                        when (content) {
+                            BROADCAST_EDIT_POST_LOCAL_IMAGE_CONTENT -> {
+                                Log.d(TAG, "BROADCAST_EDIT_POST_LOCAL_IMAGE_CONTENT")
+
+                                // TODO: Need to do with another method
+                                uploadDataToCloudinary(uri, clip, flags)
+                            }
+
+                            BROADCAST_EDIT_POST_REMOTE_IMAGE_CONTENT -> {
+                                Log.d(TAG, "BROADCAST_EDIT_POST_REMOTE_IMAGE_CONTENT, postId: ${PostService.editPost.postId}")
+
+                                PostService.editPost(PostService.editPost.postId, UserDataServices.email, UserDataServices.name,
+                                        UserDataServices.avatarName, PostService.editPost.postImageId,
+                                        App.prefs.postContent) { createSuccess ->
+                                    if (createSuccess) {
+                                        refreshSocialWallUi()
+                                    } else {
+                                        errorToast()
+                                    }
+                                }
+                            }
+                        }
+
                     }
 
                     BROADCAST_POST_MORE_INFO_DIALOG -> {
