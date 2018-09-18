@@ -42,11 +42,12 @@ internal class ResourcesAdapter(val context: Context, resources: List<Resource>,
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
         PicassoFaceDetector.initialize(context)
 
-        return if (viewType == TYPE_REGULAR) {
-            createRegularViewHolder(parent)
-        } else {
-            createFailedViewHolder(parent)
-        }
+        return createRegularViewHolder(parent)
+//        return if (viewType == TYPE_REGULAR) {
+//            createRegularViewHolder(parent)
+//        } else {
+//            createFailedViewHolder(parent)
+//        }
     }
 
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
@@ -69,33 +70,33 @@ internal class ResourcesAdapter(val context: Context, resources: List<Resource>,
         return resources.size
     }
 
-    private fun createFailedViewHolder(parent: ViewGroup): RecyclerView.ViewHolder {
-        val viewGroup: ViewGroup = LayoutInflater.from(parent.context).inflate(R.layout.item_main_gallery_error, parent, false) as ViewGroup
-        viewGroup.setOnClickListener { v ->
-            if (listener != null) {
-                val resource = v.tag as Resource
-                listener.onImageClicked(resource)
-            }
-        }
-
-        val retryButton = viewGroup.findViewById<TextView>(R.id.retryButton)
-        retryButton.setOnClickListener({ v ->
-            if (listener != null) {
-                val resource = v.tag as Resource
-                listener.onRetryClicked(resource)
-            }
-        })
-
-        val cancelButton = viewGroup.findViewById<ImageView>(R.id.cancelButton)
-        cancelButton.setOnClickListener({ v ->
-            if (listener != null) {
-                val resource = v.tag as Resource
-                listener.onDeleteClicked(resource, false)
-            }
-        })
-
-        return FailedResourceViewHolder(viewGroup, viewGroup.findViewById(R.id.filename) as TextView, viewGroup.findViewById(R.id.image_view) as ImageView, retryButton, cancelButton, viewGroup.findViewById(R.id.rescheduleLabel), viewGroup.findViewById(R.id.errorDescription) as TextView)
-    }
+//    private fun createFailedViewHolder(parent: ViewGroup): RecyclerView.ViewHolder {
+//        val viewGroup: ViewGroup = LayoutInflater.from(parent.context).inflate(R.layout.item_main_gallery_error, parent, false) as ViewGroup
+//        viewGroup.setOnClickListener { v ->
+//            if (listener != null) {
+//                val resource = v.tag as Resource
+//                listener.onImageClicked(resource)
+//            }
+//        }
+//
+//        val retryButton = viewGroup.findViewById<TextView>(R.id.retryButton)
+//        retryButton.setOnClickListener({ v ->
+//            if (listener != null) {
+//                val resource = v.tag as Resource
+//                listener.onRetryClicked(resource)
+//            }
+//        })
+//
+//        val cancelButton = viewGroup.findViewById<ImageView>(R.id.cancelButton)
+//        cancelButton.setOnClickListener({ v ->
+//            if (listener != null) {
+//                val resource = v.tag as Resource
+//                listener.onDeleteClicked(resource, false)
+//            }
+//        })
+//
+//        return FailedResourceViewHolder(viewGroup, viewGroup.findViewById(R.id.filename) as TextView, viewGroup.findViewById(R.id.image_view) as ImageView, retryButton, cancelButton, viewGroup.findViewById(R.id.rescheduleLabel), viewGroup.findViewById(R.id.errorDescription) as TextView)
+//    }
 
     private fun createRegularViewHolder(parent: ViewGroup): RecyclerView.ViewHolder {
         val viewGroup: ViewGroup = LayoutInflater.from(parent.context).inflate(R.layout.item_main_gallery, parent, false) as ViewGroup
@@ -107,13 +108,13 @@ internal class ResourcesAdapter(val context: Context, resources: List<Resource>,
             }
         }
 
-        val deleteButton = viewGroup.findViewById<ImageView>(R.id.deleteButton)
-        deleteButton.setOnClickListener({ v ->
-            if (listener != null) {
-                val resource = v.tag as Resource
-                listener.onDeleteClicked(resource, false)
-            }
-        })
+//        val deleteButton = viewGroup.findViewById<ImageView>(R.id.deleteButton)
+//        deleteButton.setOnClickListener({ v ->
+//            if (listener != null) {
+//                val resource = v.tag as Resource
+//                listener.onDeleteClicked(resource, false)
+//            }
+//        })
 
         val cancelRequest = viewGroup.findViewById<ImageView>(R.id.buttonClear)
         cancelRequest.setOnClickListener({ v ->
@@ -122,9 +123,8 @@ internal class ResourcesAdapter(val context: Context, resources: List<Resource>,
                 listener.onCancelClicked(resource)
             }
         })
-        return ResourceViewHolder(viewGroup, viewGroup.findViewById<ImageView>(R.id.image_view), viewGroup.findViewById(R.id.statusText) as TextView,
-                deleteButton, viewGroup.findViewById(R.id.buttonsContainer), viewGroup.findViewById(R.id.videoIcon), viewGroup.findViewById(R.id.uploadProgress) as ProgressBar,
-                viewGroup.findViewById(R.id.black_overlay), viewGroup.findViewById(R.id.filename) as TextView, cancelRequest)
+
+        return ResourceViewHolder(viewGroup, viewGroup.findViewById<ImageView>(R.id.image_view), cancelRequest)
     }
 
     private fun bindErrorView(holder: FailedResourceViewHolder, position: Int) {
@@ -146,23 +146,23 @@ internal class ResourcesAdapter(val context: Context, resources: List<Resource>,
 
         // setup default values for more readable code:
         holder.itemView.tag = resource
-        holder.deleteButton.tag = resource
+//        holder.deleteButton.tag = resource
         holder.cancelRequest.tag = resource
-        holder.deleteButton.visibility = View.VISIBLE
-        holder.progressBar.progress = 0
-        holder.progressBar.visibility = View.INVISIBLE
-        holder.buttonsContainer.visibility = View.GONE
+//        holder.deleteButton.visibility = View.VISIBLE
+//        holder.progressBar.progress = 0
+//        holder.progressBar.visibility = View.INVISIBLE
+//        holder.buttonsContainer.visibility = View.GONE
         holder.cancelRequest.visibility = View.GONE
-        holder.statusText.text = null
-        holder.name.text = null
+//        holder.statusText.text = null
+//        holder.name.text = null
 
         val isVideo = resource.resourceType.equals("video")
 
-        holder.blackOverlay.animate().cancel()
-        holder.blackOverlay.visibility = View.GONE
+//        holder.blackOverlay.animate().cancel()
+//        holder.blackOverlay.visibility = View.GONE
 
         // TODO: will complete delete the preview image
-//        holder.cancelRequest.visibility = View.VISIBLE
+        holder.cancelRequest.visibility = View.VISIBLE
 
         if (resource.localUri != null) {
             Log.d(TAG, "ResourcesAdapter>>>bindRegularView()-3, show image local")
@@ -202,6 +202,12 @@ internal class ResourcesAdapter(val context: Context, resources: List<Resource>,
         notifyDataSetChanged()
     }
 
+    fun removeImage(resource: Resource) {
+        this.resources.clear()
+
+        notifyDataSetChanged()
+    }
+
     fun replaceImages(resources: List<Resource>) {
         this.resources.clear()
         // TODO: Current only could upload one picture a time
@@ -234,63 +240,18 @@ internal class ResourcesAdapter(val context: Context, resources: List<Resource>,
         addResource(updated)
     }
 
-//    fun resourceUpdated(updated: Resource) {
-//        Log.d(TAG, "ResourcesAdapter>>>resourceUpdated()-1, updated.status: " + updated.status
-//        + ", validStatuses: " + validStatuses)
-//        if (!validStatuses.contains(updated.status)) {
-//            Log.d(TAG, "ResourcesAdapter>>>resourceUpdated()-2")
-//            removeResource(updated.localUri)
-//        } else {
-//            Log.d(TAG, "ResourcesAdapter>>>resourceUpdated()-3")
-//            var found = false
-//            for (i in resources.indices) {
-//                Log.d(TAG, "ResourcesAdapter>>>resourceUpdated()-4")
-//                val resourceWithMeta = resources[i]
-//                val resource = resourceWithMeta.resource
-//                if (resource.requestId.equals(updated.requestId)) {
-//                    Log.d(TAG, "ResourcesAdapter>>>resourceUpdated()-5")
-//                    Resource.copyFields(updated, resource)
-//                    resourceWithMeta.bytes = 0
-//                    resourceWithMeta.totalBytes = 0
-//                    notifyItemChanged(i)
-//                    found = true
-//                    break
-//                }
-//            }
-//
-//            if (!found) {
-//                Log.d(TAG, "ResourcesAdapter>>>resourceUpdated()-6")
-//                // not found but status is valid - it should be added here.
-//                addResource(updated)
-//            }
-//        }
-//    }
-//
-//    fun progressUpdated(requestId: String, bytes: Long, totalBytes: Long) {
-//        Log.d(TAG, "ResourcesAdapter>>>progressUpdated()-1, requestId: " + requestId +
-//        ", bytes: " + bytes + ", totalBytes: " + totalBytes)
-//        for (i in resources.indices) {
-//            val resource = resources[i]
-//            if (resource.resource.requestId.equals(requestId)) {
-//                resource.bytes = bytes
-//                resource.totalBytes = totalBytes
-//                notifyItemChanged(i)
-//                break
-//            }
-//        }
-//    }
-
-    internal interface ImageClickedListener {
+    interface ImageClickedListener {
         fun onImageClicked(resource: Resource)
 
-        fun onDeleteClicked(resource: Resource, recent: Boolean?)
-
-        fun onRetryClicked(resource: Resource)
+//        fun onDeleteClicked(resource: Resource, recent: Boolean?)
+//
+//        fun onRetryClicked(resource: Resource)
 
         fun onCancelClicked(resource: Resource)
     }
 
-    inner class ResourceViewHolder internal constructor(itemView: View, val imageView: ImageView, val statusText: TextView, val deleteButton: View, val buttonsContainer: View, val videoIcon: View, val progressBar: ProgressBar, val blackOverlay: View, val name: TextView, val cancelRequest: View) : RecyclerView.ViewHolder(itemView)
+//    inner class ResourceViewHolder internal constructor(itemView: View, val imageView: ImageView, val statusText: TextView, val buttonsContainer: View, val videoIcon: View, val progressBar: ProgressBar, val blackOverlay: View, val name: TextView, val cancelRequest: View) : RecyclerView.ViewHolder(itemView)
+    inner class ResourceViewHolder internal constructor(itemView: View, val imageView: ImageView,  val cancelRequest: View) : RecyclerView.ViewHolder(itemView)
 
     inner class FailedResourceViewHolder internal constructor(itemView: View, val filename: TextView, val imageView: ImageView, val cancelButton: View, val retryButton: View, val rescheduleLabel: View, val errorDescription: TextView) : RecyclerView.ViewHolder(itemView)
 

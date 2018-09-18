@@ -29,14 +29,10 @@ import com.brianhsu.socialgroup.Sevices.PostService
 import com.brianhsu.socialgroup.Sevices.UserDataServices
 import com.brianhsu.socialgroup.Utilities.*
 import com.brianhsu.socialgroup.model.Resource
-import com.cloudinary.Cloudinary
-import com.cloudinary.Transformation
-import com.cloudinary.Url
-import com.cloudinary.android.MediaManager
 import kotlinx.android.synthetic.main.activity_edit_post.*
 import java.util.ArrayList
 
-class EditPostActivity : AppCompatActivity(){
+class EditPostActivity : AppCompatActivity(), ResourcesAdapter.ImageClickedListener {
 
     private var backgroundHandler: Handler? = null
 
@@ -231,24 +227,16 @@ class EditPostActivity : AppCompatActivity(){
         recyclerView?.addItemDecoration(GridDividerItemDecoration(getSpan(), dividerSize))
     }
 
-    private fun getAdapter(thumbSize: Int): ResourcesAdapter {
-        return ResourcesAdapter(this, ArrayList(), thumbSize, statuses, object : ResourcesAdapter.ImageClickedListener {
-            override fun onImageClicked(resource: Resource) {
-                (this as ResourcesAdapter.ImageClickedListener).onImageClicked(resource)
-            }
+    override fun onImageClicked(resource: Resource) {
+        Toast.makeText(applicationContext, "onImageClicked", Toast.LENGTH_SHORT).show()
+    }
 
-            override fun onDeleteClicked(resource: Resource, recent: Boolean?) {
-                (this as ResourcesAdapter.ImageClickedListener).onDeleteClicked(resource, isRecent())
-            }
-
-            override fun onRetryClicked(resource: Resource) {
-                (this as ResourcesAdapter.ImageClickedListener).onRetryClicked(resource)
-            }
-
-            override fun onCancelClicked(resource: Resource) {
-                (this as ResourcesAdapter.ImageClickedListener).onCancelClicked(resource)
-            }
-        })
+    override fun onCancelClicked(resource: Resource) {
+        Toast.makeText(applicationContext, "onCancelClicked", Toast.LENGTH_SHORT).show()
+        runOnUiThread {
+            val adapter = recyclerView?.adapter as ResourcesAdapter
+            adapter.removeImage(resource)
+        }
     }
 
     private fun getData(): List<Resource> {
@@ -262,7 +250,7 @@ class EditPostActivity : AppCompatActivity(){
     private fun initThumbSizeAndLoadData() {
         if (recyclerView != null) {
             val thumbSize = recyclerView!!.width / getSpan() - dividerSize / 2
-            val adapter = getAdapter(thumbSize)
+            val adapter = ResourcesAdapter(this, ArrayList(), thumbSize, statuses, this)
 
             recyclerView!!.adapter = adapter
 
