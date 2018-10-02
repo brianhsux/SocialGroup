@@ -52,16 +52,10 @@ class MainActivity : AppCompatActivity() {
     private var parent_view: View? = null
     private var backgroundHandler: Handler? = null
 
-    private var postsDataChangedReceiver: BroadcastReceiver? = null
-    private var postsSendActionReceiver: BroadcastReceiver? = null
-    private var postMoreInfoDialogReceiver: BroadcastReceiver? = null
-    private var userDataChangeReceiver: BroadcastReceiver? = null
-
     private var mBehavior: BottomSheetBehavior<View>? = null
     private var mBottomSheetDialog: BottomSheetDialog? = null
 
     private var mIsRunning: Boolean = false
-
 
     private fun unregisterSocialGroupReceiver() {
         LocalBroadcastManager.getInstance(this).unregisterReceiver(socialGroupReceiver!!)
@@ -366,7 +360,6 @@ class MainActivity : AppCompatActivity() {
         if (App.prefs.needRefreshOnResume) {
             fragment1.refresh()
         }
-
         Log.d(TAG, "userEmail: ${App.prefs.userEmail}")
     }
 

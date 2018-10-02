@@ -28,6 +28,15 @@ import java.util.*
 class AdapterPostSectioned(private val context: Context, private val posts: List<Post>,
                            private val itemClick: (Post) -> Unit) :
         RecyclerView.Adapter<AdapterPostSectioned.ViewHolder>() {
+    private val postResources: MutableList<Post>
+
+    init {
+        this.postResources = ArrayList(posts.size)
+        for (post in postResources) {
+            this.postResources.add(post)
+        }
+    }
+
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         holder.bindPost(context, posts[position])
     }
@@ -97,5 +106,17 @@ class AdapterPostSectioned(private val context: Context, private val posts: List
 
             return finalStr
         }
+    }
+
+    // Clean all elements of the recycler
+    fun clear() {
+        postResources.clear()
+        notifyDataSetChanged()
+    }
+
+    // Add a list of items -- change to type used
+    fun addAll(list: List<Post>) {
+        postResources.addAll(list)
+        notifyDataSetChanged()
     }
 }
