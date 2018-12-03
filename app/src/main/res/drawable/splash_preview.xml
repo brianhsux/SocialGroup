@@ -7,8 +7,8 @@
     <item>
         <bitmap
             android:gravity="center"
-            android:src="@drawable/logo_small_round"
-            android:tint="@color/green_300" />
+            android:src="@drawable/logo_social_group_image"
+            android:tint="@color/mainThemeColor" />
     </item>
 
 </layer-list>

@@ -343,4 +343,7 @@
     <color name="black">#000</color>
     <color name="white">#fff</color>
     <color name="progress_overlay">#6000</color>
+
+
+    <color name="mainThemeColor">#A6171D</color>
 </resources>
