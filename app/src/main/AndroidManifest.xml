@@ -28,7 +28,7 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".controller.LoginActivity" />
+        <activity android:name=".login.LoginActivity" />
         <activity android:name=".controller.CreateUserActivity" />
         <activity android:name=".controller.CreatePostActivity" />
         <activity android:name=".controller.EditPostActivity" />

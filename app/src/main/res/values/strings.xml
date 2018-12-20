@@ -101,4 +101,6 @@
     <string name="edit_post">Edit</string>
     <string name="send_post">Send</string>
 
+    <string name="error_format_invalid">Format is invalid</string>
+    <string name="error_too_short">Too short</string>
 </resources>
