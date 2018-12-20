@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools">
+    xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <data>
         <variable
@@ -140,8 +139,7 @@
                 android:enabled="@{loginviewmodel.login.valid &amp;&amp; !loginviewmodel.isShowSpinner}"
                 android:textAllCaps="false"
                 android:textColor="@color/blue_grey_900"
-                android:onClick="@{() -> loginviewmodel.onLoginBtnClicked()}" />
-                <!--android:onClick="loginLoginBtnClicked"-->
+                android:onClick="@{() -> loginviewmodel.loginLoginBtnClicked()}" />
 
                 <View
                 android:layout_width="0dp"
@@ -170,9 +168,8 @@
                     android:textAppearance="@style/Base.TextAppearance.AppCompat.Subhead"
                     android:textColor="@color/mainThemeColor"
                     android:textStyle="bold"
-                    android:onClick="loginCreateUserBtnClicked"
-                    android:enabled="@{!loginviewmodel.isShowSpinner}" />
-
+                    android:enabled="@{!loginviewmodel.isShowSpinner}"
+                    android:onClick="@{() -> loginviewmodel.loginCreateUserBtnClicked()}"/>
             </LinearLayout>
 
         </LinearLayout>

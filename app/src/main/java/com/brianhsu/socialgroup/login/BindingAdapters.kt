@@ -14,6 +14,7 @@ object BindingAdapters {
         if (strOrResId is Int) {
             editText.error = editText.context.getString(strOrResId)
         } else {
+            // Do nothing when editText is empty
 //            editText.error = strOrResId as String
 //            editText.error = "Something error!"
         }
