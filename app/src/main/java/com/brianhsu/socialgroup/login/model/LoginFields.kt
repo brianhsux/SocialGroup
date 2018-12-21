@@ -35,16 +35,19 @@ class LoginFields : BaseObservable() {
 
     fun isEmailValid(setMessage: Boolean): Boolean {
         // Minimum a@b.c
-        if (this.email.length > 5) {
-            val indexOfAt = this.email.indexOf("@")
-            val indexOfDot = this.email.lastIndexOf(".")
-            if (indexOfAt > 0 && indexOfDot > indexOfAt && indexOfDot < this.email.length - 1) {
-                emailError.set(null)
-                return true
-            } else {
-                if (setMessage)
-                    emailError.set(R.string.error_format_invalid)
-                return false
+        if (email.length > 5) {
+            val indexOfAt = email.indexOf("@")
+            val indexOfDot = email.lastIndexOf(".")
+            return when {
+                indexOfAt in 1..(indexOfDot - 1) && indexOfDot < email.length - 1 -> {
+                    emailError.set(null)
+                    true
+                }
+                else -> {
+                    if (setMessage)
+                        emailError.set(R.string.error_format_invalid)
+                    false
+                }
             }
         }
         if (setMessage) {
@@ -55,13 +58,16 @@ class LoginFields : BaseObservable() {
     }
 
     fun isPasswordValid(setMessage: Boolean): Boolean {
-        if (this.password.length > 5) {
-            passwordError.set(null)
-            return true
-        } else {
-            if (setMessage)
-                passwordError.set(R.string.error_too_short)
-            return false
+        return when {
+            password.length > 5 -> {
+                passwordError.set(null)
+                true
+            }
+            else -> {
+                if (setMessage)
+                    passwordError.set(R.string.error_too_short)
+                false
+            }
         }
     }
 }
