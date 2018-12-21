@@ -49,11 +49,6 @@ class LoginViewModel : ObservableViewModel() {
     }
 
     @Bindable
-    fun getSpinnerVisibility(): Int {
-        return if (isShowSpinner) View.VISIBLE else View.GONE
-    }
-
-    @Bindable
     fun getIsShowSpinner(): Boolean {
         return isShowSpinner
     }
@@ -74,7 +69,6 @@ class LoginViewModel : ObservableViewModel() {
         if (login.isValid) {
             isShowSpinner = true
             hideKeyboard()
-            notifyPropertyChanged(BR.spinnerVisibility)
             notifyPropertyChanged(BR.isShowSpinner)
 
             AuthService.loginUser(login.email, login.password) { loginSuccess ->
@@ -82,15 +76,14 @@ class LoginViewModel : ObservableViewModel() {
                     AuthService.findUserByEmail(context) { findSuccess ->
                         if (findSuccess) {
                             isShowSpinner = false
-                            notifyPropertyChanged(BR.spinnerVisibility)
                             notifyPropertyChanged(BR.isShowSpinner)
                             (context as Activity).finish()
                         } else {
-                            errorToast()
+                            showErrorToast()
                         }
                     }
                 } else {
-                    errorToast()
+                    showErrorToast()
                 }
             }
         }
@@ -102,11 +95,10 @@ class LoginViewModel : ObservableViewModel() {
         (context as Activity).finish()
     }
 
-    private fun errorToast() {
+    private fun showErrorToast() {
         Toast.makeText(context, "Something went wrong, please try again.",
                 Toast.LENGTH_LONG).show()
         isShowSpinner = false
-        notifyPropertyChanged(BR.spinnerVisibility)
         notifyPropertyChanged(BR.isShowSpinner)
     }
 
